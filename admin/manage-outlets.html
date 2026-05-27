@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Manage Outlets — TekFix Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:#718096;font-size:0.85rem">Admin</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="avatar" id="user-initials">AD</div>
+      <span id="user-name" style="font-size:0.9rem"></span>
+      <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analytics</div>
+      <a href="dashboard.html"  class="nav-item">📊 Dashboard</a>
+      <a href="analytics.html"  class="nav-item">📈 Analytics</a>
+      <a href="agents.html"     class="nav-item">👤 Agent Reports</a>
+      <a href="outlets.html"    class="nav-item">🏪 Outlet Reports</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Configuration</div>
+      <a href="manage-outlets.html" class="nav-item active">🏪 Manage Outlets</a>
+      <a href="manage-agents.html"  class="nav-item">👤 Manage Agents</a>
+      <a href="manage-shifts.html"  class="nav-item">🕐 Manage Shifts</a>
+      <a href="manage-kpis.html"    class="nav-item">📋 Manage KPIs</a>
+      <a href="users.html"          class="nav-item">👥 Manage Supervisors</a>
+    </div>
+  </nav>
+
+  <main class="main-content" id="main-content">
+    <div class="page-header">
+      <h1>Manage Outlets</h1>
+      <p>Create, edit, rename, or deactivate outlets. Only active outlets appear in supervisor reports.</p>
+    </div>
+    <div id="alert-box"></div>
+
+    <!-- Create / Edit Form -->
+    <div class="card" style="max-width:580px">
+      <div class="card-header">
+        <div class="card-title" id="form-title">Add New Outlet</div>
+      </div>
+      <form id="outlet-form">
+        <input type="hidden" id="edit-id">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group">
+            <label class="form-label">Outlet Name <span class="required">*</span></label>
+            <input type="text" id="outlet-name" class="form-control" placeholder="e.g. TekFix-Main" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <input type="text" id="outlet-location" class="form-control" placeholder="e.g. Main Branch">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="outlet-description" class="form-control" rows="2"
+            placeholder="Optional notes about this outlet..."></textarea>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <button type="button" class="btn btn-outline" id="cancel-edit" style="display:none">Cancel</button>
+          <button type="submit" class="btn btn-gold" id="save-btn">Add Outlet</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Outlets Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Outlets</div>
+        <span id="outlet-count" class="badge badge-blue">0 outlets</span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Outlet Name</th>
+              <th>Location</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="outlets-body">
+            <tr><td colspan="6" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Deactivate Confirm Modal -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Deactivate Outlet</h3>
+      <button class="btn btn-outline btn-sm"
+        onclick="document.getElementById('delete-modal').classList.remove('active')">✕</button>
+    </div>
+    <p style="margin-bottom:1.5rem">
+      Are you sure? This outlet will be hidden from all supervisor dropdowns.
+      Existing report data is preserved and can be reactivated at any time.
+    </p>
+    <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+      <button class="btn btn-outline"
+        onclick="document.getElementById('delete-modal').classList.remove('active')">Cancel</button>
+      <button class="btn btn-danger" id="confirm-deactivate">Deactivate</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, logout } from '../js/auth.js';
+  import { supabase, showToast, logAction } from '../js/supabase-client.js';
+
+  document.getElementById('logout-btn').onclick = logout;
+  document.getElementById('hamburger').onclick   = () => document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('main-content').onclick = () => document.getElementById('sidebar').classList.remove('open');
+
+  let pendingDeactivateId = null;
+
+  async function loadOutlets() {
+    try {
+      const { data, error } = await supabase
+        .from('outlets')
+        .select('id, name, location, description, is_active, created_at')
+        .order('name');
+
+      if (error) throw error;
+
+      document.getElementById('outlet-count').textContent = `${data.length} outlets`;
+
+      if (!data.length) {
+        document.getElementById('outlets-body').innerHTML =
+          `<tr><td colspan="6"><div class="empty-state">
+            <p>No outlets yet. Add your first outlet above.</p>
+          </div></td></tr>`;
+        return;
+      }
+
+      document.getElementById('outlets-body').innerHTML = data.map(o => `
+        <tr>
+          <td><strong style="color:#fff">${o.name}</strong></td>
+          <td>${o.location || '—'}</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+              title="${o.description || ''}">
+            ${o.description || '—'}
+          </td>
+          <td>
+            <span class="badge ${o.is_active ? 'badge-green' : 'badge-red'}">
+              ${o.is_active ? 'Active' : 'Inactive'}
+            </span>
+          </td>
+          <td>${new Date(o.created_at).toLocaleDateString('en-KE')}</td>
+          <td>
+            <div class="action-group">
+              <button class="btn btn-outline btn-sm"
+                onclick="editOutlet('${o.id}','${escStr(o.name)}','${escStr(o.location||'')}','${escStr(o.description||'')}')">
+                Edit
+              </button>
+              <button class="btn btn-sm ${o.is_active ? 'btn-danger' : 'btn-success'}"
+                onclick="toggleOutlet('${o.id}',${o.is_active},'${escStr(o.name)}')">
+                ${o.is_active ? 'Deactivate' : 'Activate'}
+              </button>
+            </div>
+          </td>
+        </tr>`).join('');
+
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  // Escape strings for inline onclick attributes
+  function escStr(s) {
+    return (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  document.getElementById('outlet-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ab  = document.getElementById('alert-box');
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    ab.innerHTML = '';
+
+    const editId  = document.getElementById('edit-id').value;
+    const payload = {
+      name:        document.getElementById('outlet-name').value.trim(),
+      location:    document.getElementById('outlet-location').value.trim() || null,
+      description: document.getElementById('outlet-description').value.trim() || null,
+    };
+
+    try {
+      if (editId) {
+        const { error } = await supabase.from('outlets').update(payload).eq('id', editId);
+        if (error) throw error;
+        await logAction('UPDATE_OUTLET', 'outlets', editId, null, payload);
+        ab.innerHTML = `<div class="alert alert-success">✓ Outlet updated successfully!</div>`;
+      } else {
+        const { data, error } = await supabase.from('outlets').insert(payload).select().single();
+        if (error) throw error;
+        await logAction('CREATE_OUTLET', 'outlets', data.id, null, payload);
+        ab.innerHTML = `<div class="alert alert-success">✓ Outlet created successfully!</div>`;
+      }
+      resetForm();
+      await loadOutlets();
+    } catch (err) {
+      ab.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+    }
+
+    btn.disabled = false;
+  });
+
+  window.editOutlet = (id, name, location, description) => {
+    document.getElementById('edit-id').value           = id;
+    document.getElementById('outlet-name').value       = name;
+    document.getElementById('outlet-location').value   = location;
+    document.getElementById('outlet-description').value = description;
+    document.getElementById('form-title').textContent  = 'Edit Outlet';
+    document.getElementById('save-btn').textContent    = 'Save Changes';
+    document.getElementById('cancel-edit').style.display = 'inline-flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.toggleOutlet = (id, isActive, name) => {
+    if (isActive) {
+      pendingDeactivateId = id;
+      document.getElementById('delete-modal').classList.add('active');
+    } else {
+      activateOutlet(id, name);
+    }
+  };
+
+  async function activateOutlet(id, name) {
+    try {
+      const { error } = await supabase.from('outlets').update({ is_active: true }).eq('id', id);
+      if (error) throw error;
+      await logAction('ACTIVATE_OUTLET', 'outlets', id);
+      showToast(`${name} activated`, 'success');
+      await loadOutlets();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  document.getElementById('confirm-deactivate').onclick = async () => {
+    if (!pendingDeactivateId) return;
+    try {
+      const { error } = await supabase
+        .from('outlets').update({ is_active: false }).eq('id', pendingDeactivateId);
+      if (error) throw error;
+      await logAction('DEACTIVATE_OUTLET', 'outlets', pendingDeactivateId);
+      showToast('Outlet deactivated', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+    document.getElementById('delete-modal').classList.remove('active');
+    pendingDeactivateId = null;
+    await loadOutlets();
+  };
+
+  document.getElementById('cancel-edit').onclick = resetForm;
+
+  function resetForm() {
+    document.getElementById('outlet-form').reset();
+    document.getElementById('edit-id').value             = '';
+    document.getElementById('form-title').textContent    = 'Add New Outlet';
+    document.getElementById('save-btn').textContent      = 'Add Outlet';
+    document.getElementById('cancel-edit').style.display = 'none';
+  }
+
+  (async () => {
+    await requireAuth(['admin']);
+    await loadOutlets();
+  })();
+</script>
+</body>
+</html>

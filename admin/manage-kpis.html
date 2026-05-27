@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Manage KPIs — TekFix Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:#718096;font-size:0.85rem">Admin</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="avatar" id="user-initials">AD</div>
+      <span id="user-name" style="font-size:0.9rem"></span>
+      <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analytics</div>
+      <a href="dashboard.html"  class="nav-item">📊 Dashboard</a>
+      <a href="analytics.html"  class="nav-item">📈 Analytics</a>
+      <a href="agents.html"     class="nav-item">👤 Agent Reports</a>
+      <a href="outlets.html"    class="nav-item">🏪 Outlet Reports</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Configuration</div>
+      <a href="manage-outlets.html" class="nav-item">🏪 Manage Outlets</a>
+      <a href="manage-agents.html"  class="nav-item">👤 Manage Agents</a>
+      <a href="manage-shifts.html"  class="nav-item">🕐 Manage Shifts</a>
+      <a href="manage-kpis.html"    class="nav-item active">📋 Manage KPIs</a>
+      <a href="users.html"          class="nav-item">👥 Manage Supervisors</a>
+    </div>
+  </nav>
+
+  <main class="main-content" id="main-content">
+    <div class="page-header">
+      <h1>Manage KPIs & Metrics</h1>
+      <p>Define exactly what gets measured in each shift report. Set weights, categories, and input types. Weighted KPIs must sum to 100%.</p>
+    </div>
+    <div id="alert-box"></div>
+
+    <!-- Weight Summary Card -->
+    <div class="card" style="max-width:500px;margin-bottom:1.5rem">
+      <div class="card-header">
+        <div class="card-title">Quality Score Weight Distribution</div>
+        <span id="weight-status-badge" class="badge badge-gray">Loading...</span>
+      </div>
+      <div id="weight-summary">
+        <div class="spinner"></div>
+      </div>
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);
+                  display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--text-muted);font-size:0.85rem">Total Weight Allocated:</span>
+        <span id="total-weight" style="font-weight:800;font-size:1.2rem">0%</span>
+      </div>
+    </div>
+
+    <!-- Add / Edit Form -->
+    <div class="card" style="max-width:680px">
+      <div class="card-header">
+        <div class="card-title" id="form-title">Add New KPI</div>
+      </div>
+      <form id="kpi-form">
+        <input type="hidden" id="edit-id">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group">
+            <label class="form-label">KPI Name <span class="required">*</span></label>
+            <input type="text" id="kpi-name" class="form-control"
+              placeholder="e.g. Response Time Score" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category <span class="required">*</span></label>
+            <select id="kpi-category" class="form-control" required>
+              <option value="quality">Quality</option>
+              <option value="operational">Operational</option>
+              <option value="behavioral">Behavioral</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+          <div class="form-group">
+            <label class="form-label">Input Type <span class="required">*</span></label>
+            <select id="kpi-input-type" class="form-control" required>
+              <option value="rating">⭐ Star Rating (1–5)</option>
+              <option value="boolean">✓ Yes / No</option>
+              <option value="text">✏ Free Text</option>
+              <option value="number"># Numeric</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Weight in Score (%)</label>
+            <input type="number" id="kpi-weight" class="form-control"
+              min="0" max="100" value="0" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Display Order</label>
+            <input type="number" id="kpi-order" class="form-control"
+              min="1" value="10" placeholder="10">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="kpi-description" class="form-control" rows="2"
+            placeholder="What does this KPI measure and how should supervisors interpret it?"></textarea>
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:0.75rem">
+          <input type="checkbox" id="kpi-required"
+            style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer">
+          <label for="kpi-required" class="form-label" style="margin:0;cursor:pointer">
+            Required — supervisor must answer this on every report
+          </label>
+        </div>
+        <div id="weight-warning" style="display:none">
+          <div class="alert alert-warning">
+            ⚠ Total weight exceeds 100%. Please adjust weights so they sum to exactly 100% for accurate quality scoring.
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:0.5rem">
+          <button type="button" class="btn btn-outline" id="cancel-edit" style="display:none">Cancel</button>
+          <button type="submit" class="btn btn-gold" id="save-btn">Add KPI</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- KPIs Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All KPI Definitions</div>
+        <span id="kpi-count" class="badge badge-blue">0 KPIs</span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>KPI Name</th>
+              <th>Category</th>
+              <th>Input Type</th>
+              <th>Weight</th>
+              <th>Required</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="kpis-body">
+            <tr><td colspan="8" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { requireAuth, logout } from '../js/auth.js';
+  import { supabase, showToast, logAction } from '../js/supabase-client.js';
+
+  document.getElementById('logout-btn').onclick    = logout;
+  document.getElementById('hamburger').onclick     = () => document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('main-content').onclick  = () => document.getElementById('sidebar').classList.remove('open');
+
+  const categoryColors = {
+    quality:     'badge-gold',
+    operational: 'badge-blue',
+    behavioral:  'badge-red',
+    custom:      'badge-gray'
+  };
+  const inputLabels = {
+    rating:  '⭐ Rating',
+    boolean: '✓ Yes/No',
+    text:    '✏ Text',
+    number:  '# Number'
+  };
+
+  function escStr(s) {
+    return (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  async function loadKPIs() {
+    try {
+      const { data, error } = await supabase
+        .from('kpi_definitions')
+        .select('*')
+        .order('display_order');
+
+      if (error) throw error;
+
+      document.getElementById('kpi-count').textContent = `${data.length} KPIs`;
+
+      // Weight summary
+      const weighted = data.filter(k => k.weight_pct > 0 && k.is_active);
+      const total    = weighted.reduce((s, k) => s + Number(k.weight_pct), 0);
+      const tw       = document.getElementById('total-weight');
+      const badge    = document.getElementById('weight-status-badge');
+      const warning  = document.getElementById('weight-warning');
+
+      tw.textContent = `${total}%`;
+      if (total === 100) {
+        tw.style.color     = '#68D391';
+        badge.className    = 'badge badge-green';
+        badge.textContent  = '✓ Balanced';
+        warning.style.display = 'none';
+      } else if (total > 100) {
+        tw.style.color     = '#FC8181';
+        badge.className    = 'badge badge-red';
+        badge.textContent  = '⚠ Over 100%';
+        warning.style.display = 'block';
+      } else {
+        tw.style.color     = '#FAF089';
+        badge.className    = 'badge badge-gold';
+        badge.textContent  = `${100 - total}% remaining`;
+        warning.style.display = 'none';
+      }
+
+      document.getElementById('weight-summary').innerHTML = weighted.length
+        ? weighted.map(k => `
+          <div style="margin-bottom:0.75rem">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+              <span style="font-size:0.85rem;color:#CBD5E0">${k.name}</span>
+              <span style="font-size:0.85rem;font-weight:700;color:var(--gold)">${k.weight_pct}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:${k.weight_pct}%"></div>
+            </div>
+          </div>`).join('')
+        : `<p style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0">
+            No weighted KPIs defined yet. Set a weight > 0 on rating-type KPIs to include them in the quality score.
+           </p>`;
+
+      // KPIs Table
+      if (!data.length) {
+        document.getElementById('kpis-body').innerHTML =
+          `<tr><td colspan="8"><div class="empty-state">
+            <p>No KPIs defined yet. Add your first KPI above.</p>
+          </div></td></tr>`;
+        return;
+      }
+
+      document.getElementById('kpis-body').innerHTML = data.map(k => `
+        <tr>
+          <td style="font-weight:700;color:var(--gold)">${k.display_order}</td>
+          <td>
+            <strong style="color:#fff">${k.name}</strong>
+            ${k.description
+              ? `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.2rem">${k.description}</div>`
+              : ''}
+          </td>
+          <td><span class="badge ${categoryColors[k.category] || 'badge-gray'}">${k.category}</span></td>
+          <td>${inputLabels[k.input_type] || k.input_type}</td>
+          <td>${k.weight_pct > 0
+            ? `<span style="color:var(--gold);font-weight:700">${k.weight_pct}%</span>`
+            : '<span style="color:var(--text-muted)">—</span>'}</td>
+          <td>${k.is_required
+            ? `<span class="badge badge-gold">Required</span>`
+            : `<span class="badge badge-gray">Optional</span>`}</td>
+          <td><span class="badge ${k.is_active ? 'badge-green' : 'badge-red'}">${k.is_active ? 'Active' : 'Inactive'}</span></td>
+          <td>
+            <div class="action-group">
+              <button class="btn btn-outline btn-sm"
+                onclick="editKPI('${k.id}','${escStr(k.name)}','${k.category}','${k.input_type}',${k.weight_pct},${k.display_order},${k.is_required},'${escStr(k.description||'')}')">
+                Edit
+              </button>
+              <button class="btn btn-sm ${k.is_active ? 'btn-danger' : 'btn-success'}"
+                onclick="toggleKPI('${k.id}',${k.is_active},'${escStr(k.name)}')">
+                ${k.is_active ? 'Deactivate' : 'Activate'}
+              </button>
+            </div>
+          </td>
+        </tr>`).join('');
+
+    } catch (err) {
+      showToast(err.message, 'error');
+      document.getElementById('kpis-body').innerHTML =
+        `<tr><td colspan="8"><div class="alert alert-error">${err.message}</div></td></tr>`;
+    }
+  }
+
+  document.getElementById('kpi-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ab  = document.getElementById('alert-box');
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    ab.innerHTML = '';
+
+    const editId  = document.getElementById('edit-id').value;
+    const weight  = parseFloat(document.getElementById('kpi-weight').value) || 0;
+
+    if (weight < 0 || weight > 100) {
+      ab.innerHTML = `<div class="alert alert-error">Weight must be between 0 and 100.</div>`;
+      btn.disabled = false; return;
+    }
+
+    const payload = {
+      name:          document.getElementById('kpi-name').value.trim(),
+      category:      document.getElementById('kpi-category').value,
+      input_type:    document.getElementById('kpi-input-type').value,
+      weight_pct:    weight,
+      display_order: parseInt(document.getElementById('kpi-order').value) || 99,
+      description:   document.getElementById('kpi-description').value.trim() || null,
+      is_required:   document.getElementById('kpi-required').checked,
+    };
+
+    try {
+      if (editId) {
+        const { error } = await supabase
+          .from('kpi_definitions').update(payload).eq('id', editId);
+        if (error) throw error;
+        await logAction('UPDATE_KPI', 'kpi_definitions', editId, null, payload);
+        ab.innerHTML = `<div class="alert alert-success">✓ KPI updated successfully!</div>`;
+      } else {
+        const { data, error } = await supabase
+          .from('kpi_definitions').insert(payload).select().single();
+        if (error) throw error;
+        await logAction('CREATE_KPI', 'kpi_definitions', data.id, null, payload);
+        ab.innerHTML = `<div class="alert alert-success">✓ KPI created successfully!</div>`;
+      }
+      resetForm();
+      await loadKPIs();
+    } catch (err) {
+      ab.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+    }
+
+    btn.disabled = false;
+  });
+
+  window.editKPI = (id, name, category, inputType, weight, order, required, description) => {
+    document.getElementById('edit-id').value          = id;
+    document.getElementById('kpi-name').value         = name;
+    document.getElementById('kpi-category').value     = category;
+    document.getElementById('kpi-input-type').value   = inputType;
+    document.getElementById('kpi-weight').value       = weight;
+    document.getElementById('kpi-order').value        = order;
+    document.getElementById('kpi-required').checked   = required === 'true' || required === true;
+    document.getElementById('kpi-description').value  = description;
+    document.getElementById('form-title').textContent  = 'Edit KPI';
+    document.getElementById('save-btn').textContent    = 'Save Changes';
+    document.getElementById('cancel-edit').style.display = 'inline-flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.toggleKPI = async (id, isActive, name) => {
+    try {
+      const { error } = await supabase
+        .from('kpi_definitions').update({ is_active: !isActive }).eq('id', id);
+      if (error) throw error;
+      await logAction(
+        isActive ? 'DEACTIVATE_KPI' : 'ACTIVATE_KPI',
+        'kpi_definitions', id
+      );
+      showToast(`${name} ${isActive ? 'deactivated' : 'activated'}`, 'success');
+      await loadKPIs();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  document.getElementById('cancel-edit').onclick = resetForm;
+
+  function resetForm() {
+    document.getElementById('kpi-form').reset();
+    document.getElementById('edit-id').value             = '';
+    document.getElementById('kpi-weight').value          = '0';
+    document.getElementById('kpi-order').value           = '10';
+    document.getElementById('form-title').textContent    = 'Add New KPI';
+    document.getElementById('save-btn').textContent      = 'Add KPI';
+    document.getElementById('cancel-edit').style.display = 'none';
+    document.getElementById('weight-warning').style.display = 'none';
+  }
+
+  (async () => {
+    await requireAuth(['admin']);
+    await loadKPIs();
+  })();
+</script>
+</body>
+</html>

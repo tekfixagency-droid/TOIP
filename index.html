@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TekFix — Login</title>
+  <meta name="description" content="TekFix Outlet Intelligence Platform">
+  <meta name="theme-color" content="#1A3C5E">
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="brand-name">Tek<span>Fix</span></div>
+      <p>Outlet Intelligence Platform</p>
+    </div>
+    <div id="alert-box"></div>
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="email" class="form-control" placeholder="you@tekfix.co.ke" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;margin-top:0.5rem" id="login-btn">
+        Sign In
+      </button>
+    </form>
+    <p style="text-align:center;margin-top:1.5rem;font-size:0.8rem;color:#4A5568">
+      © 2026 TekFix Agencies. All rights reserved.
+    </p>
+  </div>
+
+  <script type="module">
+    import { login, touchLastLogin } from './js/auth.js';
+    import { supabase, getMyProfile } from './js/supabase-client.js';
+
+    // If already logged in, redirect immediately
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) await redirect();
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const ab  = document.getElementById('alert-box');
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      ab.innerHTML = '';
+
+      try {
+        const { user } = await login(
+          document.getElementById('email').value.trim(),
+          document.getElementById('password').value
+        );
+        await touchLastLogin(user.id);
+        await redirect();
+      } catch (err) {
+        ab.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }
+    });
+
+    async function redirect() {
+      try {
+        const profile = await getMyProfile();
+        if (profile?.role === 'admin')      window.location.href = '/admin/dashboard.html';
+        else if (profile?.role === 'supervisor') window.location.href = '/supervisor/dashboard.html';
+      } catch (e) {
+        document.getElementById('alert-box').innerHTML =
+          `<div class="alert alert-error">Could not load profile. Please try again.</div>`;
+        document.getElementById('login-btn').disabled = false;
+        document.getElementById('login-btn').textContent = 'Sign In';
+      }
+    }
+  </script>
+</body>
+</html>

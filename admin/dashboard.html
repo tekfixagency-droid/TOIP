@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — TekFix Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:#718096;font-size:0.85rem">Admin</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="avatar" id="user-initials">AD</div>
+      <span id="user-name" style="font-size:0.9rem"></span>
+      <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analytics</div>
+      <a href="dashboard.html"  class="nav-item active">📊 Dashboard</a>
+      <a href="analytics.html"  class="nav-item">📈 Analytics</a>
+      <a href="agents.html"     class="nav-item">👤 Agent Reports</a>
+      <a href="outlets.html"    class="nav-item">🏪 Outlet Reports</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Configuration</div>
+      <a href="manage-outlets.html" class="nav-item">🏪 Manage Outlets</a>
+      <a href="manage-agents.html"  class="nav-item">👤 Manage Agents</a>
+      <a href="manage-shifts.html"  class="nav-item">🕐 Manage Shifts</a>
+      <a href="manage-kpis.html"    class="nav-item">📋 Manage KPIs</a>
+      <a href="users.html"          class="nav-item">👥 Manage Supervisors</a>
+    </div>
+  </nav>
+
+  <main class="main-content" id="main-content">
+    <div class="page-header">
+      <h1>Admin Dashboard</h1>
+      <p>Platform-wide overview of outlet performance and reporting activity</p>
+    </div>
+
+    <!-- KPI Stats -->
+    <div class="stats-grid">
+      <div class="stat-card gold-accent">
+        <div class="stat-icon gold">📋</div>
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-label">Total Reports</div>
+      </div>
+      <div class="stat-card green-accent">
+        <div class="stat-icon green">📅</div>
+        <div class="stat-value" id="stat-month">—</div>
+        <div class="stat-label">Reports This Month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-value" id="stat-score">—</div>
+        <div class="stat-label">Avg Quality Score</div>
+      </div>
+      <div class="stat-card red-accent">
+        <div class="stat-icon red">⚠️</div>
+        <div class="stat-value" id="stat-incidents">—</div>
+        <div class="stat-label">Incidents This Month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon gold">🏪</div>
+        <div class="stat-value" id="stat-outlets">—</div>
+        <div class="stat-label">Active Outlets</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👤</div>
+        <div class="stat-value" id="stat-agents">—</div>
+        <div class="stat-label">Active Agents</div>
+      </div>
+      <div class="stat-card green-accent">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-value" id="stat-balanced">—</div>
+        <div class="stat-label">Balance Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="stat-supervisors">—</div>
+        <div class="stat-label">Active Supervisors</div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="card-header" style="margin-bottom:1rem">
+          <div class="card-title">Reports Over Time (Last 30 Days)</div>
+        </div>
+        <canvas id="reports-chart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="card-header" style="margin-bottom:1rem">
+          <div class="card-title">Balance Status Distribution</div>
+        </div>
+        <canvas id="balance-chart"></canvas>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="card-header" style="margin-bottom:1rem">
+          <div class="card-title">Avg Quality Score by Outlet</div>
+        </div>
+        <canvas id="outlet-score-chart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="card-header" style="margin-bottom:1rem">
+          <div class="card-title">Incident Types This Month</div>
+        </div>
+        <canvas id="incident-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Recent Reports Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recent Reports (All Supervisors)</div>
+        <a href="analytics.html" class="btn btn-outline btn-sm">View Full Analytics →</a>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Supervisor</th>
+              <th>Agent</th>
+              <th>Outlet</th>
+              <th>Shift</th>
+              <th>Balance</th>
+              <th>Quality Score</th>
+              <th>Incident</th>
+            </tr>
+          </thead>
+          <tbody id="recent-body">
+            <tr><td colspan="8" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { requireAuth, logout } from '../js/auth.js';
+  import { supabase } from '../js/supabase-client.js';
+
+  document.getElementById('logout-btn').onclick   = logout;
+  document.getElementById('hamburger').onclick    = () => document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('main-content').onclick = () => document.getElementById('sidebar').classList.remove('open');
+
+  Chart.defaults.color          = '#A0AEC0';
+  Chart.defaults.borderColor    = 'rgba(255,255,255,0.07)';
+  Chart.defaults.font.family    = 'Inter, sans-serif';
+
+  const GOLD   = '#C9A84C';
+  const BLUE   = '#2B6CB0';
+  const GREEN  = '#38A169';
+  const RED    = '#E53E3E';
+
+  (async () => {
+    await requireAuth(['admin']);
+
+    const now        = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const day30ago   = new Date(now - 30 * 864e5).toISOString().split('T')[0];
+
+    try {
+      // Fetch all data in parallel
+      const [
+        { data: reports,     error: e1 },
+        { data: outlets,     error: e2 },
+        { data: agents,      error: e3 },
+        { data: supervisors, error: e4 },
+      ] = await Promise.all([
+        supabase.from('shift_reports')
+          .select('id, reporting_date, balance_status, csat_score, team_relationship_score, cleanliness_score, unprofessional_behavior, submitted_by, outlet_id, profiles(full_name), agents(full_name), outlets(name), shift_definitions(name)')
+          .eq('is_deleted', false)
+          .order('reporting_date', { ascending: false }),
+        supabase.from('outlets').select('id').eq('is_active', true),
+        supabase.from('agents').select('id').eq('is_active', true),
+        supabase.from('profiles').select('id').eq('is_active', true),
+      ]);
+
+      if (e1) throw e1;
+
+      const calcScore = (r) => {
+        if (!r.csat_score || !r.team_relationship_score || !r.cleanliness_score) return null;
+        return Math.round((r.csat_score * 0.4 + r.team_relationship_score * 0.3 + r.cleanliness_score * 0.3) * 20);
+      };
+
+      const monthReports    = reports.filter(r => r.reporting_date >= monthStart);
+      const incidents       = monthReports.filter(r => r.unprofessional_behavior);
+      const allScores       = reports.map(calcScore).filter(Boolean);
+      const avgScore        = allScores.length
+        ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length)
+        : null;
+      const balancedCount   = reports.filter(r => r.balance_status === 'Balanced').length;
+      const balanceRate     = reports.length
+        ? Math.round((balancedCount / reports.length) * 100)
+        : 0;
+
+      // Stats
+      document.getElementById('stat-total').textContent       = reports.length;
+      document.getElementById('stat-month').textContent       = monthReports.length;
+      document.getElementById('stat-score').textContent       = avgScore !== null ? `${avgScore}%` : 'N/A';
+      document.getElementById('stat-incidents').textContent   = incidents.length;
+      document.getElementById('stat-outlets').textContent     = outlets?.length ?? '—';
+      document.getElementById('stat-agents').textContent      = agents?.length ?? '—';
+      document.getElementById('stat-balanced').textContent    = `${balanceRate}%`;
+      document.getElementById('stat-supervisors').textContent = supervisors?.length ?? '—';
+
+      // ── Chart 1: Reports over last 30 days ──
+      const last30 = reports.filter(r => r.reporting_date >= day30ago);
+      const dayMap  = {};
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now - i * 864e5).toISOString().split('T')[0];
+        dayMap[d] = 0;
+      }
+      last30.forEach(r => { if (dayMap[r.reporting_date] !== undefined) dayMap[r.reporting_date]++; });
+      new Chart(document.getElementById('reports-chart'), {
+        type: 'line',
+        data: {
+          labels:   Object.keys(dayMap).map(d => new Date(d).toLocaleDateString('en-KE', { month:'short', day:'numeric' })),
+          datasets: [{
+            label: 'Reports',
+            data:  Object.values(dayMap),
+            borderColor: GOLD, backgroundColor: 'rgba(201,168,76,0.1)',
+            borderWidth: 2, fill: true, tension: 0.4, pointRadius: 3
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+      });
+
+      // ── Chart 2: Balance Status ──
+      const balanced   = reports.filter(r => r.balance_status === 'Balanced').length;
+      const unbalanced = reports.filter(r => r.balance_status === 'Unbalanced').length;
+      new Chart(document.getElementById('balance-chart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Balanced', 'Unbalanced'],
+          datasets: [{ data: [balanced, unbalanced], backgroundColor: [GREEN, RED], borderWidth: 0 }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+      });
+
+      // ── Chart 3: Avg score by outlet ──
+      const outletMap = {};
+      reports.forEach(r => {
+        const name = r.outlets?.name || 'Unknown';
+        const s    = calcScore(r);
+        if (!s) return;
+        if (!outletMap[name]) outletMap[name] = [];
+        outletMap[name].push(s);
+      });
+      const outletNames  = Object.keys(outletMap);
+      const outletScores = outletNames.map(n => Math.round(outletMap[n].reduce((a, b) => a + b, 0) / outletMap[n].length));
+      new Chart(document.getElementById('outlet-score-chart'), {
+        type: 'bar',
+        data: {
+          labels: outletNames,
+          datasets: [{
+            label: 'Avg Score %',
+            data:  outletScores,
+            backgroundColor: outletScores.map(s => s >= 80 ? 'rgba(56,161,105,0.7)' : s >= 60 ? 'rgba(201,168,76,0.7)' : 'rgba(229,62,62,0.7)'),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, max: 100 } }
+        }
+      });
+
+      // ── Chart 4: Incident types this month ──
+      const incidentMap = {};
+      incidents.forEach(r => {
+        const t = r.unprofessional_behavior;
+        incidentMap[t] = (incidentMap[t] || 0) + 1;
+      });
+      const incidentLabels = Object.keys(incidentMap);
+      const incidentCounts = Object.values(incidentMap);
+      new Chart(document.getElementById('incident-chart'), {
+        type: 'bar',
+        data: {
+          labels: incidentLabels.length ? incidentLabels : ['No incidents'],
+          datasets: [{
+            label: 'Count',
+            data:  incidentCounts.length ? incidentCounts : [0],
+            backgroundColor: 'rgba(229,62,62,0.65)',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
+
+      // ── Recent Reports Table ──
+      const starDisplay = (s) => s ? '★'.repeat(s) + '☆'.repeat(5 - s) : '—';
+      const recent = reports.slice(0, 15);
+
+      if (!recent.length) {
+        document.getElementById('recent-body').innerHTML =
+          `<tr><td colspan="8"><div class="empty-state"><p>No reports submitted yet.</p></div></td></tr>`;
+        return;
+      }
+
+      document.getElementById('recent-body').innerHTML = recent.map(r => {
+        const score = calcScore(r);
+        return `
+          <tr>
+            <td>${new Date(r.reporting_date).toLocaleDateString('en-KE')}</td>
+            <td>${r.profiles?.full_name || '—'}</td>
+            <td>${r.agents?.full_name || '—'}</td>
+            <td>${r.outlets?.name || '—'}</td>
+            <td><span class="badge badge-blue">${r.shift_definitions?.name || '—'}</span></td>
+            <td><span class="badge ${r.balance_status === 'Balanced' ? 'badge-green' : 'badge-red'}">${r.balance_status}</span></td>
+            <td>
+              ${score !== null
+                ? `<div style="display:flex;align-items:center;gap:0.5rem">
+                    <span style="font-weight:700;color:${score >= 80 ? '#68D391' : score >= 60 ? '#C9A84C' : '#FC8181'}">${score}%</span>
+                    <div class="progress-bar" style="width:80px;margin:0">
+                      <div class="progress-fill" style="width:${score}%;background:${score >= 80 ? '#38A169' : score >= 60 ? '#C9A84C' : '#E53E3E'}"></div>
+                    </div>
+                   </div>`
+                : '—'}
+            </td>
+            <td>${r.unprofessional_behavior
+              ? `<span class="badge badge-red">${r.unprofessional_behavior}</span>`
+              : `<span class="badge badge-green">None</span>`}</td>
+          </tr>`;
+      }).join('');
+
+    } catch (err) {
+      document.getElementById('recent-body').innerHTML =
+        `<tr><td colspan="8"><div class="alert alert-error">${err.message}</div></td></tr>`;
+    }
+  })();
+</script>
+</body>
+</html>

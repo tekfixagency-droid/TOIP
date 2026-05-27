@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Outlet Reports — TekFix Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:#718096;font-size:0.85rem">Admin</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="avatar" id="user-initials">AD</div>
+      <span id="user-name" style="font-size:0.9rem"></span>
+      <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analytics</div>
+      <a href="dashboard.html"  class="nav-item">📊 Dashboard</a>
+      <a href="analytics.html"  class="nav-item">📈 Analytics</a>
+      <a href="agents.html"     class="nav-item">👤 Agent Reports</a>
+      <a href="outlets.html"    class="nav-item active">🏪 Outlet Reports</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Configuration</div>
+      <a href="manage-outlets.html" class="nav-item">🏪 Manage Outlets</a>
+      <a href="manage-agents.html"  class="nav-item">👤 Manage Agents</a>
+      <a href="manage-shifts.html"  class="nav-item">🕐 Manage Shifts</a>
+      <a href="manage-kpis.html"    class="nav-item">📋 Manage KPIs</a>
+      <a href="users.html"          class="nav-item">👥 Manage Supervisors</a>
+    </div>
+  </nav>
+
+  <main class="main-content" id="main-content">
+    <div class="page-header">
+      <h1>Outlet Performance Reports</h1>
+      <p>Compare outlets by quality score, balance compliance, and incident frequency</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <span class="filter-label">Filter:</span>
+      <select id="filter-outlet" class="form-control">
+        <option value="">All Outlets</option>
+      </select>
+      <input type="date" id="filter-from" class="form-control">
+      <input type="date" id="filter-to"   class="form-control">
+      <select id="filter-balance" class="form-control">
+        <option value="">All Balance Statuses</option>
+        <option value="Balanced">Balanced</option>
+        <option value="Unbalanced">Unbalanced</option>
+      </select>
+      <button class="btn btn-gold btn-sm"    id="apply-filter">Apply</button>
+      <button class="btn btn-outline btn-sm" id="reset-filter">Reset</button>
+    </div>
+
+    <!-- Outlet Scorecard Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Outlet Scorecard</div>
+        <span id="outlet-count" class="badge badge-blue">0 outlets</span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Outlet</th>
+              <th>Reports</th>
+              <th>Avg CSAT</th>
+              <th>Avg Team</th>
+              <th>Avg Clean</th>
+              <th>Quality Score</th>
+              <th>Balance Rate</th>
+              <th>Incidents</th>
+              <th>Last Report</th>
+            </tr>
+          </thead>
+          <tbody id="scorecard-body">
+            <tr><td colspan="10" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="card-header" style="margin-bottom:1rem">
+          <div class="card-title">Quality Score by Outlet</div>
+        </div>
+        <canvas id="outlet-score-chart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="card-header" style="margin-bottom:1rem">
+          <div class="card-title">Balance Rate by Outlet</div>
+        </div>
+        <canvas id="outlet-balance-chart"></canvas>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="card-header" style="margin-bottom:1rem">
+          <div class="card-title">Report Volume by Outlet</div>
+        </div>
+        <canvas id="outlet-volume-chart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="card-header" style="margin-bottom:1rem">
+          <div class="card-title">Incidents by Outlet</div>
+        </div>
+        <canvas id="outlet-incident-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Drill-down Report Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Outlet Reports</div>
+        <div style="display:flex;gap:0.75rem;align-items:center">
+          <span id="report-count" class="badge badge-blue">0 reports</span>
+          <button class="btn btn-outline btn-sm" id="export-csv">⬇ Export CSV</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Outlet</th>
+              <th>Agent</th>
+              <th>Supervisor</th>
+              <th>Shift</th>
+              <th>Balance</th>
+              <th>CSAT</th>
+              <th>Team</th>
+              <th>Clean</th>
+              <th>Quality %</th>
+              <th>Incident</th>
+            </tr>
+          </thead>
+          <tbody id="reports-body">
+            <tr><td colspan="11" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <button class="btn btn-outline btn-sm" id="prev-btn" disabled>← Previous</button>
+        <span id="page-info" style="font-size:0.85rem;color:var(--text-muted)">Page 1</span>
+        <button class="btn btn-outline btn-sm" id="next-btn" disabled>Next →</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { requireAuth, logout } from '../js/auth.js';
+  import { supabase, getOutlets } from '../js/supabase-client.js';
+
+  document.getElementById('logout-btn').onclick    = logout;
+  document.getElementById('hamburger').onclick     = () => document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('main-content').onclick  = () => document.getElementById('sidebar').classList.remove('open');
+
+  Chart.defaults.color       = '#A0AEC0';
+  Chart.defaults.borderColor = 'rgba(255,255,255,0.07)';
+  Chart.defaults.font.family = 'Inter, sans-serif';
+
+  const GOLD  = '#C9A84C';
+  const BLUE  = '#2B6CB0';
+  const GREEN = '#38A169';
+  const RED   = '#E53E3E';
+
+  const PAGE_SIZE = 20;
+  let allReports  = [];
+  let filtered    = [];
+  let currentPage = 1;
+  let charts      = {};
+
+  const calcScore = (r) => {
+    if (!r.csat_score || !r.team_relationship_score || !r.cleanliness_score) return null;
+    return Math.round((r.csat_score * 0.4 + r.team_relationship_score * 0.3 + r.cleanliness_score * 0.3) * 20);
+  };
+
+  function avg(arr) {
+    return arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : null;
+  }
+
+  function buildOutletStats(reports) {
+    const map = {};
+    reports.forEach(r => {
+      const id     = r.outlet_id;
+      const name   = r.outlets?.name || 'Unknown';
+      if (!map[id]) map[id] = { id, name, reports: [], scores: [], incidents: 0, balanced: 0, lastDate: null };
+      map[id].reports.push(r);
+      const s = calcScore(r);
+      if (s) map[id].scores.push(s);
+      if (r.unprofessional_behavior) map[id].incidents++;
+      if (r.balance_status === 'Balanced') map[id].balanced++;
+      if (!map[id].lastDate || r.reporting_date > map[id].lastDate) map[id].lastDate = r.reporting_date;
+    });
+
+    return Object.values(map).map(o => ({
+      ...o,
+      avgScore:    o.scores.length ? Math.round(o.scores.reduce((a,b)=>a+b,0)/o.scores.length) : null,
+      avgCsat:     avg(o.reports.map(r=>r.csat_score).filter(Boolean)),
+      avgTeam:     avg(o.reports.map(r=>r.team_relationship_score).filter(Boolean)),
+      avgClean:    avg(o.reports.map(r=>r.cleanliness_score).filter(Boolean)),
+      balanceRate: o.reports.length ? Math.round((o.balanced/o.reports.length)*100) : 0,
+      count:       o.reports.length,
+    })).sort((a, b) => (b.avgScore ?? -1) - (a.avgScore ?? -1));
+  }
+
+  function renderScorecard(stats) {
+    document.getElementById('outlet-count').textContent = `${stats.length} outlets`;
+    if (!stats.length) {
+      document.getElementById('scorecard-body').innerHTML =
+        `<tr><td colspan="10"><div class="empty-state"><p>No outlet data for the selected filters.</p></div></td></tr>`;
+      return;
+    }
+    document.getElementById('scorecard-body').innerHTML = stats.map((o, i) => `
+      <tr>
+        <td>
+          <span style="font-weight:800;color:${i===0?GOLD:i===1?'#A0AEC0':i===2?'#CD7F32':'#718096'}">
+            ${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}
+          </span>
+        </td>
+        <td><strong style="color:#fff">${o.name}</strong></td>
+        <td><span class="badge badge-blue">${o.count}</span></td>
+        <td>${o.avgCsat  ?? '—'}</td>
+        <td>${o.avgTeam  ?? '—'}</td>
+        <td>${o.avgClean ?? '—'}</td>
+        <td>
+          ${o.avgScore !== null
+            ? `<div style="display:flex;align-items:center;gap:0.5rem">
+                <span style="font-weight:700;color:${o.avgScore>=80?'#68D391':o.avgScore>=60?GOLD:'#FC8181'}">${o.avgScore}%</span>
+                <div class="progress-bar" style="width:70px;margin:0">
+                  <div class="progress-fill" style="width:${o.avgScore}%;background:${o.avgScore>=80?GREEN:o.avgScore>=60?GOLD:RED}"></div>
+                </div>
+               </div>`
+            : '—'}
+        </td>
+        <td>
+          <span class="badge ${o.balanceRate>=80?'badge-green':o.balanceRate>=50?'badge-gold':'badge-red'}">
+            ${o.balanceRate}%
+          </span>
+        </td>
+        <td>
+          ${o.incidents > 0
+            ? `<span class="badge badge-red">${o.incidents}</span>`
+            : `<span class="badge badge-green">0</span>`}
+        </td>
+        <td>${o.lastDate ? new Date(o.lastDate).toLocaleDateString('en-KE') : '—'}</td>
+      </tr>`).join('');
+  }
+
+  function buildCharts(stats) {
+    Object.values(charts).forEach(c => c.destroy());
+    charts = {};
+
+    const names = stats.map(o => o.name);
+
+    charts.score = new Chart(document.getElementById('outlet-score-chart'), {
+      type: 'bar',
+      data: {
+        labels: names,
+        datasets: [{
+          label: 'Avg Quality %',
+          data:  stats.map(o => o.avgScore),
+          backgroundColor: stats.map(o =>
+            o.avgScore === null ? 'rgba(160,174,192,0.3)'
+            : o.avgScore >= 80  ? 'rgba(56,161,105,0.75)'
+            : o.avgScore >= 60  ? 'rgba(201,168,76,0.75)'
+            : 'rgba(229,62,62,0.75)'
+          ),
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, max: 100 } }
+      }
+    });
+
+    charts.balance = new Chart(document.getElementById('outlet-balance-chart'), {
+      type: 'bar',
+      data: {
+        labels: names,
+        datasets: [{
+          label: 'Balance Rate %',
+          data:  stats.map(o => o.balanceRate),
+          backgroundColor: stats.map(o =>
+            o.balanceRate >= 80 ? 'rgba(56,161,105,0.75)'
+            : o.balanceRate >= 50 ? 'rgba(201,168,76,0.75)'
+            : 'rgba(229,62,62,0.75)'
+          ),
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, max: 100 } }
+      }
+    });
+
+    charts.volume = new Chart(document.getElementById('outlet-volume-chart'), {
+      type: 'doughnut',
+      data: {
+        labels: names,
+        datasets: [{
+          data: stats.map(o => o.count),
+          backgroundColor: [GOLD, BLUE, GREEN, RED, '#9F7AEA', '#ED8936', '#38B2AC', '#F687B3'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+
+    charts.incident = new Chart(document.getElementById('outlet-incident-chart'), {
+      type: 'bar',
+      data: {
+        labels: names,
+        datasets: [{
+          label: 'Incidents',
+          data:  stats.map(o => o.incidents),
+          backgroundColor: 'rgba(229,62,62,0.7)',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      }
+    });
+  }
+
+  function renderTable() {
+    const start   = (currentPage - 1) * PAGE_SIZE;
+    const page    = filtered.slice(start, start + PAGE_SIZE);
+    const maxPage = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
+    document.getElementById('report-count').textContent = `${filtered.length} reports`;
+    document.getElementById('page-info').textContent    = `Page ${currentPage} of ${maxPage}`;
+    document.getElementById('prev-btn').disabled        = currentPage <= 1;
+    document.getElementById('next-btn').disabled        = currentPage >= maxPage;
+
+    if (!page.length) {
+      document.getElementById('reports-body').innerHTML =
+        `<tr><td colspan="11"><div class="empty-state"><p>No reports match the selected filters.</p></div></td></tr>`;
+      return;
+    }
+
+    const star = (s) => s ? '★'.repeat(s) + '☆'.repeat(5-s) : '—';
+    document.getElementById('reports-body').innerHTML = page.map(r => {
+      const score = calcScore(r);
+      return `
+        <tr>
+          <td>${new Date(r.reporting_date).toLocaleDateString('en-KE')}</td>
+          <td><strong style="color:#fff">${r.outlets?.name || '—'}</strong></td>
+          <td>${r.agents?.full_name    || '—'}</td>
+          <td>${r.profiles?.full_name  || '—'}</td>
+          <td><span class="badge badge-blue">${r.shift_definitions?.name || '—'}</span></td>
+          <td><span class="badge ${r.balance_status==='Balanced'?'badge-green':'badge-red'}">${r.balance_status}</span></td>
+          <td style="color:var(--gold)">${star(r.csat_score)}</td>
+          <td style="color:var(--gold)">${star(r.team_relationship_score)}</td>
+          <td style="color:var(--gold)">${star(r.cleanliness_score)}</td>
+          <td>${score !== null
+            ? `<span style="font-weight:700;color:${score>=80?'#68D391':score>=60?GOLD:'#FC8181'}">${score}%</span>`
+            : '—'}</td>
+          <td>${r.unprofessional_behavior
+            ? `<span class="badge badge-red">${r.unprofessional_behavior}</span>`
+            : `<span class="badge badge-green">None</span>`}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  function applyFilters() {
+    const outlet  = document.getElementById('filter-outlet').value;
+    const from    = document.getElementById('filter-from').value;
+    const to      = document.getElementById('filter-to').value;
+    const balance = document.getElementById('filter-balance').value;
+
+    filtered = allReports.filter(r => {
+      if (outlet  && r.outlet_id      !== outlet)   return false;
+      if (from    && r.reporting_date  < from)       return false;
+      if (to      && r.reporting_date  > to)         return false;
+      if (balance && r.balance_status !== balance)   return false;
+      return true;
+    });
+    currentPage = 1;
+    const stats = buildOutletStats(filtered);
+    renderScorecard(stats);
+    buildCharts(stats);
+    renderTable();
+  }
+
+  // CSV Export
+  document.getElementById('export-csv').onclick = () => {
+    const headers = ['Date','Outlet','Agent','Supervisor','Shift','Balance','CSAT','Team','Cleanliness','Quality%','Incident','Challenges'];
+    const rows    = filtered.map(r => [
+      r.reporting_date,
+      r.outlets?.name              || '',
+      r.agents?.full_name          || '',
+      r.profiles?.full_name        || '',
+      r.shift_definitions?.name    || '',
+      r.balance_status,
+      r.csat_score                 || '',
+      r.team_relationship_score    || '',
+      r.cleanliness_score          || '',
+      calcScore(r)                 ?? '',
+      r.unprofessional_behavior    || '',
+      (r.specific_challenges       || '').replace(/,/g, ';'),
+    ]);
+    const csv  = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `tekfix-outlet-reports-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  document.getElementById('apply-filter').onclick = applyFilters;
+  document.getElementById('reset-filter').onclick  = () => {
+    document.getElementById('filter-outlet').value  = '';
+    document.getElementById('filter-from').value    = '';
+    document.getElementById('filter-to').value      = '';
+    document.getElementById('filter-balance').value = '';
+    filtered    = [...allReports];
+    currentPage = 1;
+    const stats = buildOutletStats(filtered);
+    renderScorecard(stats);
+    buildCharts(stats);
+    renderTable();
+  };
+  document.getElementById('prev-btn').onclick = () => { currentPage--; renderTable(); };
+  document.getElementById('next-btn').onclick = () => { currentPage++; renderTable(); };
+
+  (async () => {
+    await requireAuth(['admin']);
+
+    try {
+      const outlets = await getOutlets(false);
+      const outletSel = document.getElementById('filter-outlet');
+      outlets.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.id; opt.textContent = o.name;
+        outletSel.appendChild(opt);
+      });
+    } catch(_) {}
+
+    try {
+      const { data, error } = await supabase
+        .from('shift_reports')
+        .select('*, profiles(full_name), agents(full_name), outlets(name), shift_definitions(name)')
+        .eq('is_deleted', false)
+        .order('reporting_date', { ascending: false });
+
+      if (error) throw error;
+
+      allReports = data;
+      filtered   = [...allReports];
+      const stats = buildOutletStats(filtered);
+      renderScorecard(stats);
+      buildCharts(stats);
+      renderTable();
+    } catch (err) {
+      document.getElementById('scorecard-body').innerHTML =
+        `<tr><td colspan="10"><div class="alert alert-error">${err.message}</div></td></tr>`;
+    }
+  })();
+</script>
+</body>
+</html>

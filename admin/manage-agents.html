@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Manage Agents — TekFix Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:#718096;font-size:0.85rem">Admin</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="avatar" id="user-initials">AD</div>
+      <span id="user-name" style="font-size:0.9rem"></span>
+      <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analytics</div>
+      <a href="dashboard.html"  class="nav-item">📊 Dashboard</a>
+      <a href="analytics.html"  class="nav-item">📈 Analytics</a>
+      <a href="agents.html"     class="nav-item">👤 Agent Reports</a>
+      <a href="outlets.html"    class="nav-item">🏪 Outlet Reports</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Configuration</div>
+      <a href="manage-outlets.html" class="nav-item">🏪 Manage Outlets</a>
+      <a href="manage-agents.html"  class="nav-item active">👤 Manage Agents</a>
+      <a href="manage-shifts.html"  class="nav-item">🕐 Manage Shifts</a>
+      <a href="manage-kpis.html"    class="nav-item">📋 Manage KPIs</a>
+      <a href="users.html"          class="nav-item">👥 Manage Supervisors</a>
+    </div>
+  </nav>
+
+  <main class="main-content" id="main-content">
+    <div class="page-header">
+      <h1>Manage Agents</h1>
+      <p>Add, edit, reassign to outlets, or deactivate agents. Only active agents appear in supervisor report dropdowns.</p>
+    </div>
+    <div id="alert-box"></div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <span class="filter-label">Filter:</span>
+      <select id="filter-outlet" class="form-control">
+        <option value="">All Outlets</option>
+      </select>
+      <select id="filter-status" class="form-control">
+        <option value="">All Statuses</option>
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+      </select>
+      <button class="btn btn-outline btn-sm" id="reset-filter">Reset</button>
+    </div>
+
+    <!-- Add / Edit Form -->
+    <div class="card" style="max-width:620px">
+      <div class="card-header">
+        <div class="card-title" id="form-title">Add New Agent</div>
+      </div>
+      <form id="agent-form">
+        <input type="hidden" id="edit-id">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group">
+            <label class="form-label">Full Name <span class="required">*</span></label>
+            <input type="text" id="agent-name" class="form-control" placeholder="e.g. John Doe" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigned Outlet</label>
+            <select id="agent-outlet" class="form-control">
+              <option value="">No specific outlet</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="agent-phone" class="form-control" placeholder="+254...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <input type="text" id="agent-notes" class="form-control" placeholder="Any remarks...">
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <button type="button" class="btn btn-outline" id="cancel-edit" style="display:none">Cancel</button>
+          <button type="submit" class="btn btn-gold" id="save-btn">Add Agent</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Agents Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Agents</div>
+        <span id="agent-count" class="badge badge-blue">0 agents</span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Outlet</th>
+              <th>Phone</th>
+              <th>Notes</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="agents-body">
+            <tr><td colspan="6" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { requireAuth, logout } from '../js/auth.js';
+  import { supabase, getOutlets, populateSelect, showToast, logAction } from '../js/supabase-client.js';
+
+  document.getElementById('logout-btn').onclick    = logout;
+  document.getElementById('hamburger').onclick     = () => document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('main-content').onclick  = () => document.getElementById('sidebar').classList.remove('open');
+
+  let allAgents = [];
+  let outlets   = [];
+
+  function escStr(s) {
+    return (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  async function init() {
+    await requireAuth(['admin']);
+
+    try {
+      outlets = await getOutlets(false); // include inactive so admin can see all
+      populateSelect(document.getElementById('agent-outlet'),   outlets, 'id', 'name', 'No specific outlet');
+      populateSelect(document.getElementById('filter-outlet'),  outlets, 'id', 'name', 'All Outlets');
+    } catch (err) {
+      showToast('Failed to load outlets: ' + err.message, 'error');
+    }
+
+    await loadAgents();
+
+    document.getElementById('filter-outlet').onchange = renderTable;
+    document.getElementById('filter-status').onchange = renderTable;
+    document.getElementById('reset-filter').onclick   = () => {
+      document.getElementById('filter-outlet').value = '';
+      document.getElementById('filter-status').value = '';
+      renderTable();
+    };
+  }
+
+  async function loadAgents() {
+    try {
+      const { data, error } = await supabase
+        .from('agents')
+        .select('id, full_name, outlet_id, phone, notes, is_active, created_at, outlets(name)')
+        .order('full_name');
+      if (error) throw error;
+      allAgents = data;
+      renderTable();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  function renderTable() {
+    const fo = document.getElementById('filter-outlet').value;
+    const fs = document.getElementById('filter-status').value;
+
+    let filtered = allAgents;
+    if (fo) filtered = filtered.filter(a => a.outlet_id === fo);
+    if (fs !== '') filtered = filtered.filter(a => String(a.is_active) === fs);
+
+    document.getElementById('agent-count').textContent = `${filtered.length} agents`;
+
+    if (!filtered.length) {
+      document.getElementById('agents-body').innerHTML =
+        `<tr><td colspan="6"><div class="empty-state">
+          <p>No agents match the selected filters.</p>
+        </div></td></tr>`;
+      return;
+    }
+
+    document.getElementById('agents-body').innerHTML = filtered.map(a => `
+      <tr>
+        <td><strong style="color:#fff">${a.full_name}</strong></td>
+        <td>${a.outlets?.name
+          ? `<span class="badge badge-blue">${a.outlets.name}</span>`
+          : `<span class="badge badge-gray">Unassigned</span>`}</td>
+        <td>${a.phone || '—'}</td>
+        <td>${a.notes || '—'}</td>
+        <td>
+          <span class="badge ${a.is_active ? 'badge-green' : 'badge-red'}">
+            ${a.is_active ? 'Active' : 'Inactive'}
+          </span>
+        </td>
+        <td>
+          <div class="action-group">
+            <button class="btn btn-outline btn-sm"
+              onclick="editAgent('${a.id}','${escStr(a.full_name)}','${a.outlet_id||''}','${escStr(a.phone||'')}','${escStr(a.notes||'')}')">
+              Edit
+            </button>
+            <button class="btn btn-sm ${a.is_active ? 'btn-danger' : 'btn-success'}"
+              onclick="toggleAgent('${a.id}',${a.is_active},'${escStr(a.full_name)}')">
+              ${a.is_active ? 'Deactivate' : 'Activate'}
+            </button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('agent-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ab  = document.getElementById('alert-box');
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    ab.innerHTML = '';
+
+    const editId  = document.getElementById('edit-id').value;
+    const payload = {
+      full_name: document.getElementById('agent-name').value.trim(),
+      outlet_id: document.getElementById('agent-outlet').value || null,
+      phone:     document.getElementById('agent-phone').value.trim() || null,
+      notes:     document.getElementById('agent-notes').value.trim() || null,
+    };
+
+    try {
+      if (editId) {
+        const { error } = await supabase.from('agents').update(payload).eq('id', editId);
+        if (error) throw error;
+        await logAction('UPDATE_AGENT', 'agents', editId, null, payload);
+        ab.innerHTML = `<div class="alert alert-success">✓ Agent updated successfully!</div>`;
+      } else {
+        const { data, error } = await supabase.from('agents').insert(payload).select().single();
+        if (error) throw error;
+        await logAction('CREATE_AGENT', 'agents', data.id, null, payload);
+        ab.innerHTML = `<div class="alert alert-success">✓ Agent added successfully!</div>`;
+      }
+      resetForm();
+      await loadAgents();
+    } catch (err) {
+      ab.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+    }
+
+    btn.disabled = false;
+  });
+
+  window.editAgent = (id, name, outletId, phone, notes) => {
+    document.getElementById('edit-id').value       = id;
+    document.getElementById('agent-name').value    = name;
+    document.getElementById('agent-outlet').value  = outletId;
+    document.getElementById('agent-phone').value   = phone;
+    document.getElementById('agent-notes').value   = notes;
+    document.getElementById('form-title').textContent    = 'Edit Agent';
+    document.getElementById('save-btn').textContent      = 'Save Changes';
+    document.getElementById('cancel-edit').style.display = 'inline-flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.toggleAgent = async (id, isActive, name) => {
+    try {
+      const { error } = await supabase
+        .from('agents').update({ is_active: !isActive }).eq('id', id);
+      if (error) throw error;
+      await logAction(
+        isActive ? 'DEACTIVATE_AGENT' : 'ACTIVATE_AGENT',
+        'agents', id
+      );
+      showToast(`${name} ${isActive ? 'deactivated' : 'activated'}`, 'success');
+      await loadAgents();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  document.getElementById('cancel-edit').onclick = resetForm;
+
+  function resetForm() {
+    document.getElementById('agent-form').reset();
+    document.getElementById('edit-id').value             = '';
+    document.getElementById('form-title').textContent    = 'Add New Agent';
+    document.getElementById('save-btn').textContent      = 'Add Agent';
+    document.getElementById('cancel-edit').style.display = 'none';
+  }
+
+  init();
+</script>
+</body>
+</html>

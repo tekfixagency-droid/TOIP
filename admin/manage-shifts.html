@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Manage Shifts — TekFix Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:#718096;font-size:0.85rem">Admin</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="avatar" id="user-initials">AD</div>
+      <span id="user-name" style="font-size:0.9rem"></span>
+      <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Analytics</div>
+      <a href="dashboard.html"  class="nav-item">📊 Dashboard</a>
+      <a href="analytics.html"  class="nav-item">📈 Analytics</a>
+      <a href="agents.html"     class="nav-item">👤 Agent Reports</a>
+      <a href="outlets.html"    class="nav-item">🏪 Outlet Reports</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Configuration</div>
+      <a href="manage-outlets.html" class="nav-item">🏪 Manage Outlets</a>
+      <a href="manage-agents.html"  class="nav-item">👤 Manage Agents</a>
+      <a href="manage-shifts.html"  class="nav-item active">🕐 Manage Shifts</a>
+      <a href="manage-kpis.html"    class="nav-item">📋 Manage KPIs</a>
+      <a href="users.html"          class="nav-item">👥 Manage Supervisors</a>
+    </div>
+  </nav>
+
+  <main class="main-content" id="main-content">
+    <div class="page-header">
+      <h1>Manage Shift Types</h1>
+      <p>Define the shift types supervisors can choose when submitting reports. Add new shifts as operations expand.</p>
+    </div>
+    <div id="alert-box"></div>
+
+    <!-- Add / Edit Form -->
+    <div class="card" style="max-width:580px">
+      <div class="card-header">
+        <div class="card-title" id="form-title">Add New Shift Type</div>
+      </div>
+      <form id="shift-form">
+        <input type="hidden" id="edit-id">
+        <div class="form-group">
+          <label class="form-label">Shift Name <span class="required">*</span></label>
+          <input type="text" id="shift-name" class="form-control"
+            placeholder="e.g. Night Shift" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group">
+            <label class="form-label">Start Time</label>
+            <input type="time" id="shift-start" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Time</label>
+            <input type="time" id="shift-end" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="shift-description" class="form-control" rows="2"
+            placeholder="Optional notes about this shift type..."></textarea>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <button type="button" class="btn btn-outline" id="cancel-edit" style="display:none">Cancel</button>
+          <button type="submit" class="btn btn-gold" id="save-btn">Add Shift</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Shifts Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Shift Types</div>
+        <span id="shift-count" class="badge badge-blue">0 shifts</span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Shift Name</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Duration</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="shifts-body">
+            <tr><td colspan="7" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { requireAuth, logout } from '../js/auth.js';
+  import { supabase, showToast, logAction } from '../js/supabase-client.js';
+
+  document.getElementById('logout-btn').onclick    = logout;
+  document.getElementById('hamburger').onclick     = () => document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('main-content').onclick  = () => document.getElementById('sidebar').classList.remove('open');
+
+  function escStr(s) {
+    return (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  // Calculate duration between two time strings
+  function calcDuration(start, end) {
+    if (!start || !end) return '—';
+    const [sh, sm] = start.split(':').map(Number);
+    const [eh, em] = end.split(':').map(Number);
+    const mins = (eh * 60 + em) - (sh * 60 + sm);
+    if (mins <= 0) return '—';
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h}h ${m > 0 ? m + 'm' : ''}`.trim() : `${m}m`;
+  }
+
+  async function loadShifts() {
+    try {
+      const { data, error } = await supabase
+        .from('shift_definitions')
+        .select('*')
+        .order('start_time');
+
+      if (error) throw error;
+
+      document.getElementById('shift-count').textContent = `${data.length} shifts`;
+
+      if (!data.length) {
+        document.getElementById('shifts-body').innerHTML =
+          `<tr><td colspan="7"><div class="empty-state">
+            <p>No shift types defined yet. Add your first shift above.</p>
+          </div></td></tr>`;
+        return;
+      }
+
+      document.getElementById('shifts-body').innerHTML = data.map(s => `
+        <tr>
+          <td><strong style="color:#fff">${s.name}</strong></td>
+          <td>${s.start_time || '—'}</td>
+          <td>${s.end_time   || '—'}</td>
+          <td><span class="badge badge-blue">${calcDuration(s.start_time, s.end_time)}</span></td>
+          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+              title="${escStr(s.description||'')}">
+            ${s.description || '—'}
+          </td>
+          <td>
+            <span class="badge ${s.is_active ? 'badge-green' : 'badge-red'}">
+              ${s.is_active ? 'Active' : 'Inactive'}
+            </span>
+          </td>
+          <td>
+            <div class="action-group">
+              <button class="btn btn-outline btn-sm"
+                onclick="editShift('${s.id}','${escStr(s.name)}','${s.start_time||''}','${s.end_time||''}','${escStr(s.description||'')}')">
+                Edit
+              </button>
+              <button class="btn btn-sm ${s.is_active ? 'btn-danger' : 'btn-success'}"
+                onclick="toggleShift('${s.id}',${s.is_active},'${escStr(s.name)}')">
+                ${s.is_active ? 'Deactivate' : 'Activate'}
+              </button>
+            </div>
+          </td>
+        </tr>`).join('');
+
+    } catch (err) {
+      showToast(err.message, 'error');
+      document.getElementById('shifts-body').innerHTML =
+        `<tr><td colspan="7"><div class="alert alert-error">${err.message}</div></td></tr>`;
+    }
+  }
+
+  document.getElementById('shift-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ab  = document.getElementById('alert-box');
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    ab.innerHTML = '';
+
+    const editId  = document.getElementById('edit-id').value;
+    const payload = {
+      name:        document.getElementById('shift-name').value.trim(),
+      start_time:  document.getElementById('shift-start').value || null,
+      end_time:    document.getElementById('shift-end').value   || null,
+      description: document.getElementById('shift-description').value.trim() || null,
+    };
+
+    try {
+      if (editId) {
+        const { error } = await supabase
+          .from('shift_definitions').update(payload).eq('id', editId);
+        if (error) throw error;
+        await logAction('UPDATE_SHIFT', 'shift_definitions', editId, null, payload);
+        ab.innerHTML = `<div class="alert alert-success">✓ Shift type updated successfully!</div>`;
+      } else {
+        const { data, error } = await supabase
+          .from('shift_definitions').insert(payload).select().single();
+        if (error) throw error;
+        await logAction('CREATE_SHIFT', 'shift_definitions', data.id, null, payload);
+        ab.innerHTML = `<div class="alert alert-success">✓ Shift type created successfully!</div>`;
+      }
+      resetForm();
+      await loadShifts();
+    } catch (err) {
+      ab.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+    }
+
+    btn.disabled = false;
+  });
+
+  window.editShift = (id, name, start, end, desc) => {
+    document.getElementById('edit-id').value            = id;
+    document.getElementById('shift-name').value         = name;
+    document.getElementById('shift-start').value        = start;
+    document.getElementById('shift-end').value          = end;
+    document.getElementById('shift-description').value  = desc;
+    document.getElementById('form-title').textContent   = 'Edit Shift Type';
+    document.getElementById('save-btn').textContent     = 'Save Changes';
+    document.getElementById('cancel-edit').style.display = 'inline-flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.toggleShift = async (id, isActive, name) => {
+    try {
+      const { error } = await supabase
+        .from('shift_definitions').update({ is_active: !isActive }).eq('id', id);
+      if (error) throw error;
+      await logAction(
+        isActive ? 'DEACTIVATE_SHIFT' : 'ACTIVATE_SHIFT',
+        'shift_definitions', id
+      );
+      showToast(`${name} ${isActive ? 'deactivated' : 'activated'}`, 'success');
+      await loadShifts();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  document.getElementById('cancel-edit').onclick = resetForm;
+
+  function resetForm() {
+    document.getElementById('shift-form').reset();
+    document.getElementById('edit-id').value             = '';
+    document.getElementById('form-title').textContent    = 'Add New Shift Type';
+    document.getElementById('save-btn').textContent      = 'Add Shift';
+    document.getElementById('cancel-edit').style.display = 'none';
+  }
+
+  (async () => {
+    await requireAuth(['admin']);
+    await loadShifts();
+  })();
+</script>
+</body>
+</html>
