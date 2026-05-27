@@ -8,118 +8,110 @@
 </head>
 <body>
 <div class="app-shell">
+
   <header class="topbar">
     <div style="display:flex;align-items:center;gap:1rem">
       <button class="hamburger" id="hamburger">☰</button>
-      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:#718096;font-size:0.85rem">Supervisor</span></div>
+      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:var(--text-muted);font-size:0.82rem">Supervisor</span></div>
     </div>
     <div class="topbar-right">
       <div class="avatar" id="user-initials">SV</div>
-      <span id="user-name" style="font-size:0.9rem"></span>
+      <span id="user-name" style="font-size:0.875rem;color:var(--slate)"></span>
       <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
     </div>
   </header>
 
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Menu</div>
-      <a href="dashboard.html" class="nav-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-        Dashboard
-      </a>
-      <a href="submit.html" class="nav-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        Submit Report
-      </a>
-      <a href="history.html" class="nav-item active">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        My Submissions
-      </a>
-    </div>
-  </nav>
+  <div class="body-row">
 
-  <main class="main-content" id="main-content">
-    <div class="page-header">
-      <h1>My Submissions</h1>
-      <p>View and manage your submitted shift reports</p>
-    </div>
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Menu</div>
+        <a href="dashboard.html" class="nav-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </a>
+        <a href="submit.html" class="nav-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Submit Report
+        </a>
+        <a href="history.html" class="nav-item active">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          My Submissions
+        </a>
+      </div>
+    </nav>
 
-    <!-- Stats -->
-    <div class="stats-grid">
-      <div class="stat-card gold-accent">
-        <div class="stat-icon gold">📋</div>
-        <div class="stat-value" id="stat-total">—</div>
-        <div class="stat-label">Total Submitted</div>
+    <main class="main-content" id="main-content">
+      <div class="page-header">
+        <h1>My Submissions</h1>
+        <p>View and manage your submitted shift reports</p>
       </div>
-      <div class="stat-card green-accent">
-        <div class="stat-icon green">📅</div>
-        <div class="stat-value" id="stat-month">—</div>
-        <div class="stat-label">This Month</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">📆</div>
-        <div class="stat-value" id="stat-last" style="font-size:1.1rem">—</div>
-        <div class="stat-label">Last Submission</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon gold">⭐</div>
-        <div class="stat-value" id="stat-score">—</div>
-        <div class="stat-label">Avg Quality Score</div>
-      </div>
-    </div>
 
-    <!-- Filters -->
-    <div class="filter-bar">
-      <span class="filter-label">Filter:</span>
-      <select id="filter-outlet" class="form-control">
-        <option value="">All Outlets</option>
-      </select>
-      <input type="date" id="filter-from" class="form-control" placeholder="From date">
-      <input type="date" id="filter-to"   class="form-control" placeholder="To date">
-      <select id="filter-balance" class="form-control">
-        <option value="">All Balance Statuses</option>
-        <option value="Balanced">Balanced</option>
-        <option value="Unbalanced">Unbalanced</option>
-      </select>
-      <button class="btn btn-gold btn-sm" id="apply-filter">Apply</button>
-      <button class="btn btn-outline btn-sm" id="reset-filter">Reset</button>
-    </div>
+      <div class="stats-grid">
+        <div class="stat-card gold-accent">
+          <div class="stat-icon gold">📋</div>
+          <div class="stat-value" id="stat-total">—</div>
+          <div class="stat-label">Total Submitted</div>
+        </div>
+        <div class="stat-card green-accent">
+          <div class="stat-icon green">📅</div>
+          <div class="stat-value" id="stat-month">—</div>
+          <div class="stat-label">This Month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📆</div>
+          <div class="stat-value" id="stat-last" style="font-size:1.1rem">—</div>
+          <div class="stat-label">Last Submission</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon gold">⭐</div>
+          <div class="stat-value" id="stat-score">—</div>
+          <div class="stat-label">Avg Quality Score</div>
+        </div>
+      </div>
 
-    <!-- Table -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">All Reports</div>
-        <span id="report-count" class="badge badge-blue">0 reports</span>
+      <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <select id="filter-outlet" class="form-control"><option value="">All Outlets</option></select>
+        <input type="date" id="filter-from" class="form-control" placeholder="From date">
+        <input type="date" id="filter-to"   class="form-control" placeholder="To date">
+        <select id="filter-balance" class="form-control">
+          <option value="">All Statuses</option>
+          <option value="Balanced">Balanced</option>
+          <option value="Unbalanced">Unbalanced</option>
+        </select>
+        <button class="btn btn-gold btn-sm" id="apply-filter">Apply</button>
+        <button class="btn btn-outline btn-sm" id="reset-filter">Reset</button>
       </div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Agent</th>
-              <th>Outlet</th>
-              <th>Shift</th>
-              <th>Balance</th>
-              <th>CSAT</th>
-              <th>Incident</th>
-              <th>Challenges</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="reports-body">
-            <tr><td colspan="9" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>
-          </tbody>
-        </table>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Reports</div>
+          <span id="report-count" class="badge badge-blue">0 reports</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Agent</th><th>Outlet</th><th>Shift</th>
+                <th>Balance</th><th>CSAT</th><th>Incident</th><th>Challenges</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reports-body">
+              <tr><td colspan="9" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+          <button class="btn btn-outline btn-sm" id="prev-btn" disabled>← Previous</button>
+          <span id="page-info" style="font-size:0.85rem;color:var(--text-muted)">Page 1</span>
+          <button class="btn btn-outline btn-sm" id="next-btn" disabled>Next →</button>
+        </div>
       </div>
-      <!-- Pagination -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
-        <button class="btn btn-outline btn-sm" id="prev-btn" disabled>← Previous</button>
-        <span id="page-info" style="font-size:0.85rem;color:var(--text-muted)">Page 1</span>
-        <button class="btn btn-outline btn-sm" id="next-btn" disabled>Next →</button>
-      </div>
-    </div>
-  </main>
-</div>
+    </main>
+
+  </div><!-- /.body-row -->
+</div><!-- /.app-shell -->
 
 <!-- View Modal -->
 <div class="modal-overlay" id="view-modal">
@@ -154,7 +146,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Balance Status</label>
-        <div style="display:flex;gap:1rem;margin-top:0.25rem">
+        <div style="display:flex;gap:1rem;margin-top:0.3rem;flex-wrap:wrap">
           <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
             <input type="radio" name="edit-balance" value="Balanced">
             <span class="badge badge-green">✓ Balanced</span>
@@ -165,8 +157,9 @@
           </label>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
-        <div class="form-group">
+      <!-- Edit scores — stacks on mobile via .scores-row -->
+      <div class="scores-row">
+        <div class="score-group form-group">
           <label class="form-label">CSAT Score</label>
           <div class="star-rating">
             <input type="radio" name="edit-csat" id="ec5" value="5"><label for="ec5">★</label>
@@ -176,7 +169,7 @@
             <input type="radio" name="edit-csat" id="ec1" value="1"><label for="ec1">★</label>
           </div>
         </div>
-        <div class="form-group">
+        <div class="score-group form-group">
           <label class="form-label">Team Score</label>
           <div class="star-rating">
             <input type="radio" name="edit-team" id="et5" value="5"><label for="et5">★</label>
@@ -186,7 +179,7 @@
             <input type="radio" name="edit-team" id="et1" value="1"><label for="et1">★</label>
           </div>
         </div>
-        <div class="form-group">
+        <div class="score-group form-group">
           <label class="form-label">Cleanliness Score</label>
           <div class="star-rating">
             <input type="radio" name="edit-clean" id="ecl5" value="5"><label for="ecl5">★</label>
@@ -216,7 +209,7 @@
         <label class="form-label">Areas of Improvement</label>
         <textarea id="edit-improvement" class="form-control" rows="3"></textarea>
       </div>
-      <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem">
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem;flex-wrap:wrap">
         <button type="button" class="btn btn-outline" id="cancel-edit-btn">Cancel</button>
         <button type="submit" class="btn btn-gold" id="save-edit-btn">Save Changes</button>
       </div>
@@ -236,10 +229,7 @@
   document.getElementById('cancel-edit-btn').onclick = () => document.getElementById('edit-modal').classList.remove('active');
 
   const PAGE_SIZE = 20;
-  let allReports  = [];
-  let filtered    = [];
-  let currentPage = 1;
-  let profile     = null;
+  let allReports = [], filtered = [], currentPage = 1, profile = null;
 
   async function loadReports() {
     try {
@@ -249,7 +239,6 @@
         .eq('submitted_by', profile.id)
         .eq('is_deleted', false)
         .order('reporting_date', { ascending: false });
-
       if (error) throw error;
       allReports = data;
       applyFilters();
@@ -267,9 +256,8 @@
     const lastDate   = allReports.length ? new Date(allReports[0].reporting_date).toLocaleDateString('en-KE') : 'N/A';
     const scores     = allReports
       .filter(r => r.csat_score && r.team_relationship_score && r.cleanliness_score)
-      .map(r => (r.csat_score * 0.4 + r.team_relationship_score * 0.3 + r.cleanliness_score * 0.3) * 20);
-    const avgScore   = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
-
+      .map(r => (r.csat_score*0.4 + r.team_relationship_score*0.3 + r.cleanliness_score*0.3)*20);
+    const avgScore   = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null;
     document.getElementById('stat-total').textContent = allReports.length;
     document.getElementById('stat-month').textContent = thisMonth;
     document.getElementById('stat-last').textContent  = lastDate;
@@ -281,12 +269,11 @@
     const from    = document.getElementById('filter-from').value;
     const to      = document.getElementById('filter-to').value;
     const balance = document.getElementById('filter-balance').value;
-
     filtered = allReports.filter(r => {
-      if (outlet  && r.outlet_id !== outlet)         return false;
-      if (from    && r.reporting_date < from)         return false;
-      if (to      && r.reporting_date > to)           return false;
-      if (balance && r.balance_status !== balance)    return false;
+      if (outlet  && r.outlet_id !== outlet)      return false;
+      if (from    && r.reporting_date < from)      return false;
+      if (to      && r.reporting_date > to)        return false;
+      if (balance && r.balance_status !== balance) return false;
       return true;
     });
     currentPage = 1;
@@ -298,7 +285,6 @@
     const page    = filtered.slice(start, start + PAGE_SIZE);
     const total   = filtered.length;
     const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
-
     document.getElementById('report-count').textContent = `${total} reports`;
     document.getElementById('page-info').textContent    = `Page ${currentPage} of ${maxPage}`;
     document.getElementById('prev-btn').disabled        = currentPage <= 1;
@@ -310,11 +296,8 @@
       return;
     }
 
-    const starDisplay = (s) => s ? '★'.repeat(s) + '☆'.repeat(5 - s) : '—';
-    const canEdit     = (createdAt) => {
-      const diff = (Date.now() - new Date(createdAt).getTime()) / 1000 / 3600;
-      return diff <= 24;
-    };
+    const starDisplay = s => s ? '★'.repeat(s) + '☆'.repeat(5-s) : '—';
+    const canEdit     = ca => (Date.now() - new Date(ca).getTime()) / 3600000 <= 24;
 
     document.getElementById('reports-body').innerHTML = page.map(r => `
       <tr>
@@ -322,60 +305,52 @@
         <td>${r.agents?.full_name || '—'}</td>
         <td>${r.outlets?.name || '—'}</td>
         <td><span class="badge badge-blue">${r.shift_definitions?.name || '—'}</span></td>
-        <td><span class="badge ${r.balance_status === 'Balanced' ? 'badge-green' : 'badge-red'}">${r.balance_status}</span></td>
+        <td><span class="badge ${r.balance_status==='Balanced'?'badge-green':'badge-red'}">${r.balance_status}</span></td>
         <td style="color:var(--gold)">${starDisplay(r.csat_score)}</td>
         <td>${r.unprofessional_behavior
           ? `<span class="badge badge-red">${r.unprofessional_behavior}</span>`
           : `<span class="badge badge-green">None</span>`}</td>
-        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help"
-            title="${r.specific_challenges || ''}">
-          ${r.specific_challenges ? r.specific_challenges.substring(0, 40) + (r.specific_challenges.length > 40 ? '…' : '') : '—'}
+        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help"
+            title="${r.specific_challenges||''}">
+          ${r.specific_challenges ? r.specific_challenges.substring(0,40)+(r.specific_challenges.length>40?'…':'') : '—'}
         </td>
         <td>
           <div class="action-group">
             <button class="btn btn-outline btn-sm" onclick="viewReport('${r.id}')">View</button>
             ${canEdit(r.created_at)
               ? `<button class="btn btn-gold btn-sm" onclick="openEdit('${r.id}')">Edit</button>`
-              : `<button class="btn btn-outline btn-sm" disabled title="Edit window closed (24hrs)">Locked</button>`}
+              : `<button class="btn btn-outline btn-sm" disabled title="Edit window closed">Locked</button>`}
           </div>
         </td>
       </tr>`).join('');
   }
 
-  window.viewReport = (id) => {
-    const r = allReports.find(x => x.id === id);
-    if (!r) return;
-    const starDisplay = (s) => s ? '★'.repeat(s) + '☆'.repeat(5 - s) : '—';
+  window.viewReport = id => {
+    const r = allReports.find(x => x.id === id); if (!r) return;
+    const s = n => n ? '★'.repeat(n)+'☆'.repeat(5-n) : '—';
     document.getElementById('view-content').innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
-        <div><div style="font-size:0.78rem;color:var(--text-muted)">Date</div><div style="font-weight:600">${new Date(r.reporting_date).toLocaleDateString('en-KE')}</div></div>
-        <div><div style="font-size:0.78rem;color:var(--text-muted)">Agent</div><div style="font-weight:600">${r.agents?.full_name || '—'}</div></div>
-        <div><div style="font-size:0.78rem;color:var(--text-muted)">Outlet</div><div style="font-weight:600">${r.outlets?.name || '—'}</div></div>
-        <div><div style="font-size:0.78rem;color:var(--text-muted)">Shift</div><div style="font-weight:600">${r.shift_definitions?.name || '—'}</div></div>
-        <div><div style="font-size:0.78rem;color:var(--text-muted)">Opening Time</div><div style="font-weight:600">${r.opening_time || '—'}</div></div>
-        <div><div style="font-size:0.78rem;color:var(--text-muted)">Closing Time</div><div style="font-weight:600">${r.closing_time || '—'}</div></div>
-        <div><div style="font-size:0.78rem;color:var(--text-muted)">Balance Status</div>
-          <span class="badge ${r.balance_status === 'Balanced' ? 'badge-green' : 'badge-red'}">${r.balance_status}</span></div>
-        <div><div style="font-size:0.78rem;color:var(--text-muted)">CSAT Score</div><div style="color:var(--gold)">${starDisplay(r.csat_score)}</div></div>
-        <div><div style="font-size:0.78rem;color:var(--text-muted)">Team Score</div><div style="color:var(--gold)">${starDisplay(r.team_relationship_score)}</div></div>
-        <div><div style="font-size:0.78rem;color:var(--text-muted)">Cleanliness Score</div><div style="color:var(--gold)">${starDisplay(r.cleanliness_score)}</div></div>
+        <div><div style="font-size:.78rem;color:var(--text-muted)">Date</div><div style="font-weight:600">${new Date(r.reporting_date).toLocaleDateString('en-KE')}</div></div>
+        <div><div style="font-size:.78rem;color:var(--text-muted)">Agent</div><div style="font-weight:600">${r.agents?.full_name||'—'}</div></div>
+        <div><div style="font-size:.78rem;color:var(--text-muted)">Outlet</div><div style="font-weight:600">${r.outlets?.name||'—'}</div></div>
+        <div><div style="font-size:.78rem;color:var(--text-muted)">Shift</div><div style="font-weight:600">${r.shift_definitions?.name||'—'}</div></div>
+        <div><div style="font-size:.78rem;color:var(--text-muted)">Opening</div><div style="font-weight:600">${r.opening_time||'—'}</div></div>
+        <div><div style="font-size:.78rem;color:var(--text-muted)">Closing</div><div style="font-weight:600">${r.closing_time||'—'}</div></div>
+        <div><div style="font-size:.78rem;color:var(--text-muted)">Balance</div><span class="badge ${r.balance_status==='Balanced'?'badge-green':'badge-red'}">${r.balance_status}</span></div>
+        <div><div style="font-size:.78rem;color:var(--text-muted)">CSAT</div><div style="color:var(--gold)">${s(r.csat_score)}</div></div>
+        <div><div style="font-size:.78rem;color:var(--text-muted)">Team</div><div style="color:var(--gold)">${s(r.team_relationship_score)}</div></div>
+        <div><div style="font-size:.78rem;color:var(--text-muted)">Cleanliness</div><div style="color:var(--gold)">${s(r.cleanliness_score)}</div></div>
       </div>
-      <div style="margin-bottom:0.75rem"><div style="font-size:0.78rem;color:var(--text-muted)">Unprofessional Behavior</div>
-        <div>${r.unprofessional_behavior || 'None'}</div></div>
-      <div style="margin-bottom:0.75rem"><div style="font-size:0.78rem;color:var(--text-muted)">Specific Challenges</div>
-        <div>${r.specific_challenges || '—'}</div></div>
-      <div><div style="font-size:0.78rem;color:var(--text-muted)">Areas of Improvement</div>
-        <div>${r.areas_of_improvement || '—'}</div></div>`;
+      <div style="margin-bottom:.75rem"><div style="font-size:.78rem;color:var(--text-muted)">Behavior</div><div>${r.unprofessional_behavior||'None'}</div></div>
+      <div style="margin-bottom:.75rem"><div style="font-size:.78rem;color:var(--text-muted)">Challenges</div><div>${r.specific_challenges||'—'}</div></div>
+      <div><div style="font-size:.78rem;color:var(--text-muted)">Improvements</div><div>${r.areas_of_improvement||'—'}</div></div>`;
     document.getElementById('view-modal').classList.add('active');
   };
 
-  window.openEdit = (id) => {
-    const r = allReports.find(x => x.id === id);
-    if (!r) return;
-    const diff = (Date.now() - new Date(r.created_at).getTime()) / 1000 / 3600;
-    if (diff > 24) {
-      alert('Edit window has closed. Reports can only be edited within 24 hours of submission.');
-      return;
+  window.openEdit = id => {
+    const r = allReports.find(x => x.id === id); if (!r) return;
+    if ((Date.now() - new Date(r.created_at).getTime()) / 3600000 > 24) {
+      alert('Edit window closed. Reports can only be edited within 24 hours of submission.'); return;
     }
     document.getElementById('edit-report-id').value   = r.id;
     document.getElementById('edit-opening').value     = r.opening_time || '';
@@ -383,39 +358,32 @@
     document.getElementById('edit-behavior').value    = r.unprofessional_behavior || '';
     document.getElementById('edit-challenges').value  = r.specific_challenges || '';
     document.getElementById('edit-improvement').value = r.areas_of_improvement || '';
-
-    const balRadio = document.querySelector(`input[name="edit-balance"][value="${r.balance_status}"]`);
-    if (balRadio) balRadio.checked = true;
-    const csatRadio  = document.querySelector(`input[name="edit-csat"][value="${r.csat_score}"]`);
-    if (csatRadio) csatRadio.checked = true;
-    const teamRadio  = document.querySelector(`input[name="edit-team"][value="${r.team_relationship_score}"]`);
-    if (teamRadio) teamRadio.checked = true;
-    const cleanRadio = document.querySelector(`input[name="edit-clean"][value="${r.cleanliness_score}"]`);
-    if (cleanRadio) cleanRadio.checked = true;
-
+    const setR = (name, val) => { const el = document.querySelector(`input[name="${name}"][value="${val}"]`); if(el) el.checked=true; };
+    setR('edit-balance', r.balance_status);
+    setR('edit-csat',    r.csat_score);
+    setR('edit-team',    r.team_relationship_score);
+    setR('edit-clean',   r.cleanliness_score);
     document.getElementById('edit-alert').innerHTML = '';
     document.getElementById('edit-modal').classList.add('active');
   };
 
-  document.getElementById('edit-form').addEventListener('submit', async (e) => {
+  document.getElementById('edit-form').addEventListener('submit', async e => {
     e.preventDefault();
     const btn = document.getElementById('save-edit-btn');
     const ab  = document.getElementById('edit-alert');
     btn.disabled = true; btn.textContent = 'Saving...'; ab.innerHTML = '';
-
-    const id      = document.getElementById('edit-report-id').value;
+    const id = document.getElementById('edit-report-id').value;
     const payload = {
       opening_time:            document.getElementById('edit-opening').value || null,
       closing_time:            document.getElementById('edit-closing').value || null,
       balance_status:          document.querySelector('input[name="edit-balance"]:checked')?.value,
-      csat_score:              parseInt(document.querySelector('input[name="edit-csat"]:checked')?.value) || null,
-      team_relationship_score: parseInt(document.querySelector('input[name="edit-team"]:checked')?.value) || null,
-      cleanliness_score:       parseInt(document.querySelector('input[name="edit-clean"]:checked')?.value) || null,
+      csat_score:              parseInt(document.querySelector('input[name="edit-csat"]:checked')?.value)||null,
+      team_relationship_score: parseInt(document.querySelector('input[name="edit-team"]:checked')?.value)||null,
+      cleanliness_score:       parseInt(document.querySelector('input[name="edit-clean"]:checked')?.value)||null,
       unprofessional_behavior: document.getElementById('edit-behavior').value || null,
       specific_challenges:     document.getElementById('edit-challenges').value.trim() || null,
       areas_of_improvement:    document.getElementById('edit-improvement').value.trim() || null,
     };
-
     try {
       const { error } = await supabase.from('shift_reports').update(payload).eq('id', id);
       if (error) throw error;
@@ -430,10 +398,7 @@
 
   document.getElementById('apply-filter').onclick = applyFilters;
   document.getElementById('reset-filter').onclick  = () => {
-    document.getElementById('filter-outlet').value  = '';
-    document.getElementById('filter-from').value    = '';
-    document.getElementById('filter-to').value      = '';
-    document.getElementById('filter-balance').value = '';
+    ['filter-outlet','filter-from','filter-to','filter-balance'].forEach(id => document.getElementById(id).value = '');
     applyFilters();
   };
   document.getElementById('prev-btn').onclick = () => { currentPage--; renderTable(); };

@@ -8,169 +8,187 @@
 </head>
 <body>
 <div class="app-shell">
+
   <header class="topbar">
     <div style="display:flex;align-items:center;gap:1rem">
       <button class="hamburger" id="hamburger">☰</button>
-      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:#718096;font-size:0.85rem">Supervisor</span></div>
+      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:var(--text-muted);font-size:0.82rem">Supervisor</span></div>
     </div>
     <div class="topbar-right">
       <div class="avatar" id="user-initials">SV</div>
-      <span id="user-name" style="font-size:0.9rem"></span>
+      <span id="user-name" style="font-size:0.875rem;color:var(--slate)"></span>
       <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
     </div>
   </header>
 
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Menu</div>
-      <a href="dashboard.html" class="nav-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-        Dashboard
-      </a>
-      <a href="submit.html" class="nav-item active">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        Submit Report
-      </a>
-      <a href="history.html" class="nav-item">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        My Submissions
-      </a>
-    </div>
-  </nav>
+  <div class="body-row">
 
-  <main class="main-content" id="main-content">
-    <div class="page-header">
-      <h1>Submit Shift Report</h1>
-      <p>Record outlet observations for admin review</p>
-    </div>
-    <div id="alert-box"></div>
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Menu</div>
+        <a href="dashboard.html" class="nav-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </a>
+        <a href="submit.html" class="nav-item active">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Submit Report
+        </a>
+        <a href="history.html" class="nav-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          My Submissions
+        </a>
+      </div>
+    </nav>
 
-    <div class="card" style="max-width:760px">
-      <form id="report-form">
+    <main class="main-content" id="main-content">
+      <div class="page-header">
+        <h1>Submit Shift Report</h1>
+        <p>Record outlet observations for admin review</p>
+      </div>
+      <div id="alert-box"></div>
 
-        <!-- Row 1: Date + Outlet -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-          <div class="form-group">
-            <label class="form-label">Reporting Date <span class="required">*</span></label>
-            <input type="date" id="reporting_date" class="form-control" required>
+      <div class="card">
+        <form id="report-form">
+
+          <!-- Row 1: Date + Outlet -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="form-group">
+              <label class="form-label">Reporting Date <span class="required">*</span></label>
+              <input type="date" id="reporting_date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Outlet <span class="required">*</span></label>
+              <select id="outlet_id" class="form-control" required>
+                <option value="">Loading outlets...</option>
+              </select>
+            </div>
           </div>
+
+          <!-- Agent -->
           <div class="form-group">
-            <label class="form-label">Outlet <span class="required">*</span></label>
-            <select id="outlet_id" class="form-control" required>
-              <option value="">Loading outlets...</option>
+            <label class="form-label">Agent Name <span class="required">*</span></label>
+            <select id="agent_id" class="form-control" required>
+              <option value="">Select agent...</option>
             </select>
           </div>
-        </div>
 
-        <!-- Agent -->
-        <div class="form-group">
-          <label class="form-label">Agent Name <span class="required">*</span></label>
-          <select id="agent_id" class="form-control" required>
-            <option value="">Select outlet first...</option>
-          </select>
-        </div>
+          <!-- Row 2: Times + Shift -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem" class="times-row">
+            <div class="form-group">
+              <label class="form-label">Opening Time</label>
+              <input type="time" id="opening_time" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Closing Time</label>
+              <input type="time" id="closing_time" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Shift Type <span class="required">*</span></label>
+              <select id="shift_definition_id" class="form-control" required>
+                <option value="">Loading shifts...</option>
+              </select>
+            </div>
+          </div>
 
-        <!-- Row 2: Times + Shift -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+          <!-- Balance Status -->
           <div class="form-group">
-            <label class="form-label">Opening Time</label>
-            <input type="time" id="opening_time" class="form-control">
+            <label class="form-label">Balance Status <span class="required">*</span></label>
+            <div style="display:flex;gap:1.25rem;margin-top:0.3rem;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+                <input type="radio" name="balance_status" value="Balanced" required>
+                <span class="badge badge-green">✓ Balanced</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+                <input type="radio" name="balance_status" value="Unbalanced">
+                <span class="badge badge-red">✗ Unbalanced</span>
+              </label>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Closing Time</label>
-            <input type="time" id="closing_time" class="form-control">
+
+          <!-- Star Ratings — uses .scores-row so mobile stacks correctly -->
+          <div class="scores-row">
+            <div class="score-group form-group">
+              <label class="form-label">CSAT Score <span class="required">*</span></label>
+              <div class="star-rating">
+                <input type="radio" name="csat_score" id="c5" value="5"><label for="c5">★</label>
+                <input type="radio" name="csat_score" id="c4" value="4"><label for="c4">★</label>
+                <input type="radio" name="csat_score" id="c3" value="3"><label for="c3">★</label>
+                <input type="radio" name="csat_score" id="c2" value="2"><label for="c2">★</label>
+                <input type="radio" name="csat_score" id="c1" value="1"><label for="c1">★</label>
+              </div>
+            </div>
+            <div class="score-group form-group">
+              <label class="form-label">Team Relationship Score <span class="required">*</span></label>
+              <div class="star-rating">
+                <input type="radio" name="team_score" id="t5" value="5"><label for="t5">★</label>
+                <input type="radio" name="team_score" id="t4" value="4"><label for="t4">★</label>
+                <input type="radio" name="team_score" id="t3" value="3"><label for="t3">★</label>
+                <input type="radio" name="team_score" id="t2" value="2"><label for="t2">★</label>
+                <input type="radio" name="team_score" id="t1" value="1"><label for="t1">★</label>
+              </div>
+            </div>
+            <div class="score-group form-group">
+              <label class="form-label">Cleanliness Score <span class="required">*</span></label>
+              <div class="star-rating">
+                <input type="radio" name="cleanliness_score" id="cl5" value="5"><label for="cl5">★</label>
+                <input type="radio" name="cleanliness_score" id="cl4" value="4"><label for="cl4">★</label>
+                <input type="radio" name="cleanliness_score" id="cl3" value="3"><label for="cl3">★</label>
+                <input type="radio" name="cleanliness_score" id="cl2" value="2"><label for="cl2">★</label>
+                <input type="radio" name="cleanliness_score" id="cl1" value="1"><label for="cl1">★</label>
+              </div>
+            </div>
           </div>
+
+          <!-- Unprofessional Behavior -->
           <div class="form-group">
-            <label class="form-label">Shift Type <span class="required">*</span></label>
-            <select id="shift_definition_id" class="form-control" required>
-              <option value="">Loading shifts...</option>
+            <label class="form-label">Unprofessional Behavior Observed</label>
+            <select id="unprofessional_behavior" class="form-control">
+              <option value="">None</option>
+              <option value="Late Arrival">Late Arrival</option>
+              <option value="Insubordination">Insubordination</option>
+              <option value="Phone Misuse">Phone Misuse</option>
+              <option value="Poor Customer Handling">Poor Customer Handling</option>
+              <option value="Other">Other (describe below)</option>
             </select>
           </div>
-        </div>
 
-        <!-- Balance Status -->
-        <div class="form-group">
-          <label class="form-label">Balance Status <span class="required">*</span></label>
-          <div style="display:flex;gap:1rem;margin-top:0.25rem">
-            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
-              <input type="radio" name="balance_status" value="Balanced" required>
-              <span class="badge badge-green">✓ Balanced</span>
-            </label>
-            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
-              <input type="radio" name="balance_status" value="Unbalanced">
-              <span class="badge badge-red">✗ Unbalanced</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Star Ratings -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+          <!-- Text Areas -->
           <div class="form-group">
-            <label class="form-label">CSAT Score <span class="required">*</span></label>
-            <div class="star-rating">
-              <input type="radio" name="csat_score" id="c5" value="5"><label for="c5">★</label>
-              <input type="radio" name="csat_score" id="c4" value="4"><label for="c4">★</label>
-              <input type="radio" name="csat_score" id="c3" value="3"><label for="c3">★</label>
-              <input type="radio" name="csat_score" id="c2" value="2"><label for="c2">★</label>
-              <input type="radio" name="csat_score" id="c1" value="1"><label for="c1">★</label>
-            </div>
+            <label class="form-label">Specific Challenges</label>
+            <textarea id="specific_challenges" class="form-control" rows="3"
+              placeholder="Describe any operational challenges observed during this shift..."></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label">Team Relationship Score <span class="required">*</span></label>
-            <div class="star-rating">
-              <input type="radio" name="team_score" id="t5" value="5"><label for="t5">★</label>
-              <input type="radio" name="team_score" id="t4" value="4"><label for="t4">★</label>
-              <input type="radio" name="team_score" id="t3" value="3"><label for="t3">★</label>
-              <input type="radio" name="team_score" id="t2" value="2"><label for="t2">★</label>
-              <input type="radio" name="team_score" id="t1" value="1"><label for="t1">★</label>
-            </div>
+            <label class="form-label">Areas of Improvement</label>
+            <textarea id="areas_of_improvement" class="form-control" rows="3"
+              placeholder="Your recommendations for improvement..."></textarea>
           </div>
-          <div class="form-group">
-            <label class="form-label">Cleanliness Score <span class="required">*</span></label>
-            <div class="star-rating">
-              <input type="radio" name="cleanliness_score" id="cl5" value="5"><label for="cl5">★</label>
-              <input type="radio" name="cleanliness_score" id="cl4" value="4"><label for="cl4">★</label>
-              <input type="radio" name="cleanliness_score" id="cl3" value="3"><label for="cl3">★</label>
-              <input type="radio" name="cleanliness_score" id="cl2" value="2"><label for="cl2">★</label>
-              <input type="radio" name="cleanliness_score" id="cl1" value="1"><label for="cl1">★</label>
-            </div>
+
+          <!-- Actions -->
+          <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.25rem;flex-wrap:wrap">
+            <button type="reset" class="btn btn-outline" id="clear-btn">Clear Form</button>
+            <button type="submit" class="btn btn-gold" id="submit-btn">Submit Report</button>
           </div>
-        </div>
 
-        <!-- Unprofessional Behavior -->
-        <div class="form-group">
-          <label class="form-label">Unprofessional Behavior Observed</label>
-          <select id="unprofessional_behavior" class="form-control">
-            <option value="">None</option>
-            <option value="Late Arrival">Late Arrival</option>
-            <option value="Insubordination">Insubordination</option>
-            <option value="Phone Misuse">Phone Misuse</option>
-            <option value="Poor Customer Handling">Poor Customer Handling</option>
-            <option value="Other">Other (describe below)</option>
-          </select>
-        </div>
+        </form>
+      </div>
+    </main>
 
-        <!-- Text Areas -->
-        <div class="form-group">
-          <label class="form-label">Specific Challenges</label>
-          <textarea id="specific_challenges" class="form-control" rows="3"
-            placeholder="Describe any operational challenges observed during this shift..."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Areas of Improvement</label>
-          <textarea id="areas_of_improvement" class="form-control" rows="3"
-            placeholder="Your recommendations for improvement..."></textarea>
-        </div>
+  </div><!-- /.body-row -->
+</div><!-- /.app-shell -->
 
-        <!-- Actions -->
-        <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1rem">
-          <button type="reset" class="btn btn-outline" id="clear-btn">Clear Form</button>
-          <button type="submit" class="btn btn-gold" id="submit-btn">Submit Report</button>
-        </div>
-      </form>
-    </div>
-  </main>
-</div>
+<style>
+  /* Times row also stacks on mobile */
+  @media (max-width: 768px) {
+    .times-row { grid-template-columns: 1fr !important; }
+    /* Date+Outlet row */
+    .times-row ~ div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  }
+  @media (max-width: 520px) {
+    div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  }
+</style>
 
 <script type="module">
   import { requireAuth, logout } from '../js/auth.js';
@@ -178,7 +196,6 @@
 
   document.getElementById('logout-btn').onclick = logout;
 
-  // Hamburger
   document.getElementById('hamburger').onclick = () => {
     document.getElementById('sidebar').classList.toggle('open');
   };
@@ -186,7 +203,6 @@
     document.getElementById('sidebar').classList.remove('open');
   };
 
-  // Reset button — keep today's date
   document.getElementById('clear-btn').addEventListener('click', () => {
     document.getElementById('report-form').reset();
     document.getElementById('reporting_date').value = new Date().toISOString().split('T')[0];
@@ -196,19 +212,15 @@
     const profile = await requireAuth(['supervisor', 'admin']);
     if (!profile) return;
 
-    // Set today's date
     document.getElementById('reporting_date').value = new Date().toISOString().split('T')[0];
 
     let allAgents = [];
 
     try {
       const [outlets, agents, shifts] = await Promise.all([
-        getOutlets(),
-        getAgents(),
-        getShiftDefinitions()
+        getOutlets(), getAgents(), getShiftDefinitions()
       ]);
       allAgents = agents;
-
       populateSelect(document.getElementById('outlet_id'), outlets, 'id', 'name', 'Select outlet...');
       populateSelect(document.getElementById('agent_id'),  agents,  'id', 'full_name', 'Select agent...');
       populateSelect(document.getElementById('shift_definition_id'), shifts, 'id', 'name', 'Select shift type...');
@@ -218,27 +230,23 @@
       return;
     }
 
-    // Agents are not outlet-specific — always show all active agents
+    // Agents rotate — always show all regardless of outlet selected
     document.getElementById('outlet_id').addEventListener('change', () => {
       populateSelect(document.getElementById('agent_id'), allAgents, 'id', 'full_name', 'Select agent...');
     });
 
-    // Submit
     document.getElementById('report-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('submit-btn');
       const ab  = document.getElementById('alert-box');
-      btn.disabled = true;
-      btn.textContent = 'Submitting...';
-      ab.innerHTML = '';
+      btn.disabled = true; btn.textContent = 'Submitting...'; ab.innerHTML = '';
 
-      const csatVal        = document.querySelector('input[name="csat_score"]:checked')?.value;
-      const teamVal        = document.querySelector('input[name="team_score"]:checked')?.value;
-      const cleanVal       = document.querySelector('input[name="cleanliness_score"]:checked')?.value;
-      const balanceVal     = document.querySelector('input[name="balance_status"]:checked')?.value;
-      const unprofVal      = document.getElementById('unprofessional_behavior').value;
+      const csatVal    = document.querySelector('input[name="csat_score"]:checked')?.value;
+      const teamVal    = document.querySelector('input[name="team_score"]:checked')?.value;
+      const cleanVal   = document.querySelector('input[name="cleanliness_score"]:checked')?.value;
+      const balanceVal = document.querySelector('input[name="balance_status"]:checked')?.value;
+      const unprofVal  = document.getElementById('unprofessional_behavior').value;
 
-      // Validate required fields
       if (!balanceVal) {
         ab.innerHTML = `<div class="alert alert-error">Please select a Balance Status.</div>`;
         btn.disabled = false; btn.textContent = 'Submit Report'; return;
@@ -267,34 +275,21 @@
 
       try {
         const { data, error } = await supabase
-          .from('shift_reports')
-          .insert(payload)
-          .select()
-          .single();
-
+          .from('shift_reports').insert(payload).select().single();
         if (error) throw error;
-
         await logAction('CREATE_REPORT', 'shift_reports', data.id, null, payload);
-
         ab.innerHTML = `<div class="alert alert-success">✓ Report submitted successfully! The admin has been notified.</div>`;
         document.getElementById('report-form').reset();
         document.getElementById('reporting_date').value = new Date().toISOString().split('T')[0];
-
-        // Re-populate selects after reset
-        const [outlets, agents, shifts] = await Promise.all([
-          getOutlets(), getAgents(), getShiftDefinitions()
-        ]);
+        const [outlets, agents, shifts] = await Promise.all([getOutlets(), getAgents(), getShiftDefinitions()]);
         allAgents = agents;
         populateSelect(document.getElementById('outlet_id'), outlets, 'id', 'name', 'Select outlet...');
         populateSelect(document.getElementById('agent_id'),  agents,  'id', 'full_name', 'Select agent...');
         populateSelect(document.getElementById('shift_definition_id'), shifts, 'id', 'name', 'Select shift type...');
-
       } catch (err) {
         ab.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
       }
-
-      btn.disabled = false;
-      btn.textContent = 'Submit Report';
+      btn.disabled = false; btn.textContent = 'Submit Report';
     });
   })();
 </script>
