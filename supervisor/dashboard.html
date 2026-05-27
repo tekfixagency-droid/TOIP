@@ -44,32 +44,38 @@
     <main class="main-content" id="main-content">
       <div class="page-header">
         <h1>Welcome back, <span id="welcome-name">Supervisor</span> 👋</h1>
-        <p>Here's a summary of your reporting activity</p>
+        <p>Click any stat card to explore the related reports below</p>
       </div>
 
+      <!-- STAT CARDS -->
       <div class="stats-grid">
-        <div class="stat-card gold-accent">
+        <div class="stat-card gold-accent stat-clickable" id="card-total" title="View all reports">
           <div class="stat-icon gold">📋</div>
           <div class="stat-value" id="stat-total">—</div>
           <div class="stat-label">Total Reports Submitted</div>
+          <div class="stat-hint">Click to view all →</div>
         </div>
-        <div class="stat-card green-accent">
+        <div class="stat-card green-accent stat-clickable" id="card-month" title="View this month's reports">
           <div class="stat-icon green">📅</div>
           <div class="stat-value" id="stat-month">—</div>
           <div class="stat-label">Submitted This Month</div>
+          <div class="stat-hint">Click to view →</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-clickable" id="card-score" title="View top-scored reports">
           <div class="stat-icon">⭐</div>
           <div class="stat-value" id="stat-score">—</div>
           <div class="stat-label">My Avg Quality Score</div>
+          <div class="stat-hint">Click to view →</div>
         </div>
-        <div class="stat-card red-accent">
+        <div class="stat-card red-accent stat-clickable" id="card-incidents" title="View incident reports">
           <div class="stat-icon red">⚠️</div>
           <div class="stat-value" id="stat-incidents">—</div>
           <div class="stat-label">Total Incidents Logged</div>
+          <div class="stat-hint">Click to view →</div>
         </div>
       </div>
 
+      <!-- QUICK ACTIONS -->
       <div class="card">
         <div class="card-header"><div class="card-title">Quick Actions</div></div>
         <div style="display:flex;gap:1rem;flex-wrap:wrap">
@@ -78,10 +84,14 @@
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">My Recent Submissions</div>
-          <a href="history.html" class="btn btn-outline btn-sm">View All</a>
+      <!-- DRILL-DOWN PANEL — hidden until a stat is clicked -->
+      <div id="drilldown-panel" class="drilldown-panel" style="display:none">
+        <div class="drilldown-header">
+          <div>
+            <div class="drilldown-title" id="drilldown-title">Reports</div>
+            <div class="drilldown-sub" id="drilldown-sub"></div>
+          </div>
+          <button class="drilldown-close" id="drilldown-close" title="Close">✕</button>
         </div>
         <div class="table-wrapper">
           <table>
@@ -96,16 +106,125 @@
                 <th>Incident</th>
               </tr>
             </thead>
+            <tbody id="drilldown-body"></tbody>
+          </table>
+        </div>
+        <div class="drilldown-footer">
+          <a href="history.html" class="btn btn-outline btn-sm">View full history →</a>
+        </div>
+      </div>
+
+      <!-- RECENT SUBMISSIONS -->
+      <div class="card" id="recent-card">
+        <div class="card-header">
+          <div class="card-title">My Recent Submissions</div>
+          <a href="history.html" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Agent</th><th>Outlet</th><th>Shift</th>
+                <th>Balance</th><th>CSAT</th><th>Incident</th>
+              </tr>
+            </thead>
             <tbody id="recent-body">
               <tr><td colspan="7" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>
             </tbody>
           </table>
         </div>
       </div>
-    </main>
 
-  </div><!-- /.body-row -->
-</div><!-- /.app-shell -->
+    </main>
+  </div>
+</div>
+
+<style>
+  /* ── Clickable stat cards ── */
+  .stat-clickable {
+    cursor: pointer;
+    position: relative;
+  }
+  .stat-clickable:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.13);
+  }
+  .stat-clickable.active-stat {
+    border-color: var(--teal-mid) !important;
+    box-shadow: 0 0 0 3px rgba(20,184,166,0.2), 0 8px 24px rgba(0,0,0,0.1) !important;
+  }
+  .stat-hint {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.2s ease;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  .stat-clickable:hover .stat-hint {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Drill-down panel ── */
+  .drilldown-panel {
+    background: var(--white);
+    border: 2px solid var(--teal-mid);
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.4rem;
+    box-shadow: 0 8px 32px rgba(20,184,166,0.12), 0 2px 8px rgba(0,0,0,0.06);
+    animation: drillSlide 0.35s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+  @keyframes drillSlide {
+    from { opacity: 0; transform: translateY(-16px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)     scale(1);    }
+  }
+  .drilldown-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .drilldown-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .drilldown-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+  }
+  .drilldown-close {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: var(--slate);
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+  .drilldown-close:hover { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+  .drilldown-footer {
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* Teal accent on drilldown table rows */
+  #drilldown-body tr:hover { background: #F0FDFA; }
+</style>
 
 <script type="module">
   import { requireAuth, logout } from '../js/auth.js';
@@ -113,7 +232,53 @@
 
   document.getElementById('logout-btn').onclick = logout;
   document.getElementById('hamburger').onclick = () => document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('main-content').onclick = () => document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('main-content').onclick = (e) => {
+    if (!e.target.closest('#sidebar')) document.getElementById('sidebar').classList.remove('open');
+  };
+
+  const starDisplay = s => s ? '★'.repeat(s) + '☆'.repeat(5-s) : '—';
+
+  function rowHtml(r) {
+    return `<tr>
+      <td>${new Date(r.reporting_date).toLocaleDateString('en-KE')}</td>
+      <td>${r.agents?.full_name || '—'}</td>
+      <td>${r.outlets?.name || '—'}</td>
+      <td>${r.shift_definitions?.name || '—'}</td>
+      <td><span class="badge ${r.balance_status === 'Balanced' ? 'badge-green' : 'badge-red'}">${r.balance_status}</span></td>
+      <td style="color:var(--gold)">${starDisplay(r.csat_score)}</td>
+      <td>${r.unprofessional_behavior
+        ? `<span class="badge badge-red">${r.unprofessional_behavior}</span>`
+        : `<span class="badge badge-green">None</span>`}</td>
+    </tr>`;
+  }
+
+  function showDrilldown(title, subtitle, rows) {
+    const panel = document.getElementById('drilldown-panel');
+    document.getElementById('drilldown-title').textContent = title;
+    document.getElementById('drilldown-sub').textContent   = subtitle;
+    document.getElementById('drilldown-body').innerHTML    = rows.length
+      ? rows.map(rowHtml).join('')
+      : `<tr><td colspan="7"><div class="empty-state"><p>No reports found for this filter.</p></div></td></tr>`;
+
+    // Show panel with animation
+    panel.style.display = 'block';
+    panel.style.animation = 'none';
+    panel.offsetHeight; // reflow to restart animation
+    panel.style.animation = '';
+
+    // Smooth scroll to panel
+    setTimeout(() => {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  }
+
+  function hideDrilldown() {
+    const panel = document.getElementById('drilldown-panel');
+    panel.style.display = 'none';
+    document.querySelectorAll('.stat-clickable').forEach(c => c.classList.remove('active-stat'));
+  }
+
+  document.getElementById('drilldown-close').onclick = hideDrilldown;
 
   (async () => {
     const profile = await requireAuth(['supervisor', 'admin']);
@@ -122,8 +287,9 @@
     document.getElementById('welcome-name').textContent = profile.full_name.split(' ')[0];
 
     try {
-      const now = new Date();
+      const now        = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const monthName  = now.toLocaleString('en-KE', { month: 'long', year: 'numeric' });
 
       const { data: reports, error } = await supabase
         .from('shift_reports')
@@ -134,39 +300,77 @@
 
       if (error) throw error;
 
-      const total     = reports.length;
-      const thisMonth = reports.filter(r => r.reporting_date >= monthStart).length;
-      const incidents = reports.filter(r => r.unprofessional_behavior).length;
-      const scores    = reports
-        .filter(r => r.csat_score && r.team_relationship_score && r.cleanliness_score)
-        .map(r => (r.csat_score * 0.4 + r.team_relationship_score * 0.3 + r.cleanliness_score * 0.3) * 20);
-      const avgScore  = scores.length ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : null;
+      // ── Compute stats ──
+      const total       = reports.length;
+      const monthReps   = reports.filter(r => r.reporting_date >= monthStart);
+      const thisMonth   = monthReps.length;
+      const incidentReps= reports.filter(r => r.unprofessional_behavior);
+      const incidents   = incidentReps.length;
+      const scoredReps  = reports.filter(r => r.csat_score && r.team_relationship_score && r.cleanliness_score);
+      const scores      = scoredReps.map(r => (r.csat_score*0.4 + r.team_relationship_score*0.3 + r.cleanliness_score*0.3)*20);
+      const avgScore    = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null;
 
       document.getElementById('stat-total').textContent     = total;
       document.getElementById('stat-month').textContent     = thisMonth;
       document.getElementById('stat-score').textContent     = avgScore !== null ? `${avgScore}%` : 'N/A';
       document.getElementById('stat-incidents').textContent = incidents;
 
+      // ── Stat card click handlers ──
+      function activateCard(cardId) {
+        document.querySelectorAll('.stat-clickable').forEach(c => c.classList.remove('active-stat'));
+        document.getElementById(cardId).classList.add('active-stat');
+      }
+
+      document.getElementById('card-total').onclick = () => {
+        activateCard('card-total');
+        showDrilldown(
+          'All Reports Submitted',
+          `${total} total report${total !== 1 ? 's' : ''} across all time`,
+          reports
+        );
+      };
+
+      document.getElementById('card-month').onclick = () => {
+        activateCard('card-month');
+        showDrilldown(
+          `Reports — ${monthName}`,
+          `${thisMonth} report${thisMonth !== 1 ? 's' : ''} submitted this month`,
+          monthReps
+        );
+      };
+
+      document.getElementById('card-score').onclick = () => {
+        activateCard('card-score');
+        // Show reports sorted by quality score descending
+        const withScores = scoredReps.map(r => ({
+          ...r,
+          _qs: Math.round((r.csat_score*0.4 + r.team_relationship_score*0.3 + r.cleanliness_score*0.3)*20)
+        })).sort((a,b) => b._qs - a._qs);
+        showDrilldown(
+          'Reports by Quality Score',
+          `Avg score ${avgScore !== null ? avgScore+'%' : 'N/A'} · sorted highest first`,
+          withScores
+        );
+      };
+
+      document.getElementById('card-incidents').onclick = () => {
+        activateCard('card-incidents');
+        showDrilldown(
+          'Incident Reports',
+          `${incidents} report${incidents !== 1 ? 's' : ''} with unprofessional behavior logged`,
+          incidentReps
+        );
+      };
+
+      // ── Recent table (last 10) ──
       const recent = reports.slice(0, 10);
       if (!recent.length) {
         document.getElementById('recent-body').innerHTML =
           `<tr><td colspan="7"><div class="empty-state"><p>No reports yet. <a href="submit.html">Submit your first →</a></p></div></td></tr>`;
         return;
       }
+      document.getElementById('recent-body').innerHTML = recent.map(rowHtml).join('');
 
-      const starDisplay = s => s ? '★'.repeat(s) + '☆'.repeat(5-s) : '—';
-      document.getElementById('recent-body').innerHTML = recent.map(r => `
-        <tr>
-          <td>${new Date(r.reporting_date).toLocaleDateString('en-KE')}</td>
-          <td>${r.agents?.full_name || '—'}</td>
-          <td>${r.outlets?.name || '—'}</td>
-          <td>${r.shift_definitions?.name || '—'}</td>
-          <td><span class="badge ${r.balance_status === 'Balanced' ? 'badge-green' : 'badge-red'}">${r.balance_status}</span></td>
-          <td style="color:var(--gold)">${starDisplay(r.csat_score)}</td>
-          <td>${r.unprofessional_behavior
-            ? `<span class="badge badge-red">${r.unprofessional_behavior}</span>`
-            : `<span class="badge badge-green">None</span>`}</td>
-        </tr>`).join('');
     } catch (err) {
       document.getElementById('recent-body').innerHTML =
         `<tr><td colspan="7"><div class="alert alert-error">${err.message}</div></td></tr>`;
