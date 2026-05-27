@@ -9,37 +9,35 @@
 </head>
 <body>
 <div class="app-shell">
-  <header class="topbar">
-    <div style="display:flex;align-items:center;gap:1rem">
-      <button class="hamburger" id="hamburger">☰</button>
-      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:#718096;font-size:0.85rem">Admin</span></div>
-    </div>
-    <div class="topbar-right">
+  <nav class="admin-topnav">
+  <div class="admin-topnav-upper">
+    <a href="dashboard.html" class="admin-topnav-brand">Tek<span>Fix</span> <span style="font-weight:400;color:rgba(255,255,255,0.4);font-size:0.85rem">Admin</span></a>
+    <div class="admin-topnav-right">
       <div class="avatar" id="user-initials">AD</div>
-      <span id="user-name" style="font-size:0.9rem"></span>
+      <span class="username" id="user-name"></span>
       <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
     </div>
-  </header>
-
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Analytics</div>
-      <a href="dashboard.html"  class="nav-item active">📊 Dashboard</a>
-      <a href="analytics.html"  class="nav-item">📈 Analytics</a>
-      <a href="agents.html"     class="nav-item">👤 Agent Reports</a>
-      <a href="outlets.html"    class="nav-item">🏪 Outlet Reports</a>
+  </div>
+  <div class="admin-topnav-lower">
+    <div class="admin-nav-group">
+      <span class="admin-nav-group-label">Analytics</span>
+      <a href="dashboard.html"  class="admin-nav-link active">📊 Dashboard</a>
+      <a href="analytics.html"  class="admin-nav-link">📈 Analytics</a>
+      <a href="agents.html"     class="admin-nav-link">👤 Agent Reports</a>
+      <a href="outlets.html"    class="admin-nav-link">🏪 Outlet Reports</a>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Configuration</div>
-      <a href="manage-outlets.html" class="nav-item">🏪 Manage Outlets</a>
-      <a href="manage-agents.html"  class="nav-item">👤 Manage Agents</a>
-      <a href="manage-shifts.html"  class="nav-item">🕐 Manage Shifts</a>
-      <a href="manage-kpis.html"    class="nav-item">📋 Manage KPIs</a>
-      <a href="users.html"          class="nav-item">👥 Manage Supervisors</a>
+    <div class="admin-nav-separator"></div>
+    <div class="admin-nav-group">
+      <span class="admin-nav-group-label">Configuration</span>
+      <a href="manage-outlets.html" class="admin-nav-link">🏪 Manage Outlets</a>
+      <a href="manage-agents.html"  class="admin-nav-link">👤 Manage Agents</a>
+      <a href="manage-shifts.html"  class="admin-nav-link">🕐 Manage Shifts</a>
+      <a href="manage-kpis.html"    class="admin-nav-link">📋 Manage KPIs</a>
+      <a href="users.html"          class="admin-nav-link">👥 Manage Supervisors</a>
     </div>
-  </nav>
-
-  <main class="main-content" id="main-content">
+  </div>
+</nav>
+<main class="admin-main" id="main-content">
     <div class="page-header">
       <h1>Admin Dashboard</h1>
       <p>Platform-wide overview of outlet performance and reporting activity</p>
@@ -147,15 +145,12 @@
       </div>
     </div>
   </main>
-</div>
 
 <script type="module">
   import { requireAuth, logout } from '../js/auth.js';
   import { supabase } from '../js/supabase-client.js';
 
-  document.getElementById('logout-btn').onclick   = logout;
-  document.getElementById('hamburger').onclick    = () => document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('main-content').onclick = () => document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('logout-btn').onclick = logout;
 
   Chart.defaults.color          = '#A0AEC0';
   Chart.defaults.borderColor    = 'rgba(255,255,255,0.07)';
@@ -208,6 +203,41 @@
         ? Math.round((balancedCount / reports.length) * 100)
         : 0;
 
+// ── Drill-down setup ──
+      function ddRowHtml(r) {
+        const score = calcScore(r);
+        return `<tr>
+          <td>${new Date(r.reporting_date).toLocaleDateString('en-KE')}</td>
+          <td>${r.profiles?.full_name||'—'}</td>
+          <td>${r.agents?.full_name||'—'}</td>
+          <td>${r.outlets?.name||'—'}</td>
+          <td><span class="badge ${r.balance_status==='Balanced'?'badge-green':'badge-red'}">${r.balance_status}</span></td>
+          <td>${score!==null?`<span style="font-weight:700;color:${score>=80?'#68D391':score>=60?'#C9A84C':'#FC8181'}">${score}%</span>`:'—'}</td>
+          <td>${r.unprofessional_behavior?`<span class="badge badge-red">${r.unprofessional_behavior}</span>`:`<span class="badge badge-green">None</span>`}</td>
+        </tr>`;
+      }
+      function showDrilldown(title, sub, rows) {
+        const panel = document.getElementById('admin-drilldown');
+        document.getElementById('dd-title').textContent = title;
+        document.getElementById('dd-sub').textContent   = sub;
+        document.getElementById('dd-count').textContent = `${rows.length} records`;
+        document.getElementById('dd-body').innerHTML    = rows.length
+          ? rows.map(ddRowHtml).join('')
+          : `<tr><td colspan="7"><div class="empty-state"><p>No records found.</p></div></td></tr>`;
+        panel.style.display = 'block';
+        panel.style.animation = 'none'; panel.offsetHeight; panel.style.animation = '';
+        setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'start' }), 60);
+      }
+      function hideDrilldown() {
+        document.getElementById('admin-drilldown').style.display = 'none';
+        document.querySelectorAll('.stat-clickable').forEach(c => c.classList.remove('active-stat'));
+      }
+      function activateCard(id) {
+        document.querySelectorAll('.stat-clickable').forEach(c => c.classList.remove('active-stat'));
+        document.getElementById(id).classList.add('active-stat');
+      }
+      document.getElementById('dd-close').onclick = hideDrilldown;
+
       // Stats
       document.getElementById('stat-total').textContent       = reports.length;
       document.getElementById('stat-month').textContent       = monthReports.length;
@@ -216,7 +246,34 @@
       document.getElementById('stat-outlets').textContent     = outlets?.length ?? '—';
       document.getElementById('stat-agents').textContent      = agents?.length ?? '—';
       document.getElementById('stat-balanced').textContent    = `${balanceRate}%`;
-      document.getElementById('stat-supervisors').textContent = supervisors?.length ?? '—';
+document.getElementById('stat-supervisors').textContent = supervisors?.length ?? '—';
+
+      // ── Card click handlers ──
+      const monthName = now.toLocaleString('en-KE', { month:'long', year:'numeric' });
+      document.getElementById('card-total').onclick = () => {
+        activateCard('card-total');
+        showDrilldown('All Reports', `${reports.length} total reports across all time`, reports);
+      };
+      document.getElementById('card-month').onclick = () => {
+        activateCard('card-month');
+        showDrilldown(`Reports — ${monthName}`, `${monthReports.length} reports this month`, monthReports);
+      };
+      document.getElementById('card-score').onclick = () => {
+        const scored = reports
+          .filter(r => r.csat_score && r.team_relationship_score && r.cleanliness_score)
+          .sort((a,b) => calcScore(b) - calcScore(a));
+        activateCard('card-score');
+        showDrilldown('Reports by Quality Score', `Avg ${avgScore !== null ? avgScore+'%' : 'N/A'} · sorted highest first`, scored);
+      };
+      document.getElementById('card-incidents').onclick = () => {
+        activateCard('card-incidents');
+        showDrilldown('Incident Reports This Month', `${incidents.length} incidents logged`, incidents);
+      };
+      document.getElementById('card-balanced').onclick = () => {
+        const bal = reports.filter(r => r.balance_status === 'Balanced');
+        activateCard('card-balanced');
+        showDrilldown('Balanced Reports', `${bal.length} of ${reports.length} reports are balanced`, bal);
+      };
 
       // ── Chart 1: Reports over last 30 days ──
       const last30 = reports.filter(r => r.reporting_date >= day30ago);
