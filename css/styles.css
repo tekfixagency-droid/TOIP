@@ -152,6 +152,7 @@ a:hover { color: var(--teal-mid); }
   display: flex;
   flex: 1;
   align-items: stretch;
+  justify-content: center;
 }
 
 /* HAMBURGER */
@@ -213,8 +214,10 @@ a:hover { color: var(--teal-mid); }
   flex: 1;
   padding: 2rem 2.5rem;
   overflow-y: auto;
-  background: var(--bg);
-  min-width: 0;             /* prevents overflow in flex child */
+  background: #E8EDF4;
+  min-width: 0;
+  max-width: 960px;
+  margin: 0 auto;
   animation: fadeInUp 0.38s ease;
 }
 
