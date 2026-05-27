@@ -218,13 +218,9 @@
       return;
     }
 
-    // Filter agents when outlet changes
-    document.getElementById('outlet_id').addEventListener('change', (e) => {
-      const outletId = e.target.value;
-      const filtered = outletId
-        ? allAgents.filter(a => a.outlet_id === outletId)
-        : allAgents;
-      populateSelect(document.getElementById('agent_id'), filtered, 'id', 'full_name', 'Select agent...');
+    // Agents are not outlet-specific — always show all active agents
+    document.getElementById('outlet_id').addEventListener('change', () => {
+      populateSelect(document.getElementById('agent_id'), allAgents, 'id', 'full_name', 'Select agent...');
     });
 
     // Submit
