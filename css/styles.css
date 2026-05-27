@@ -152,7 +152,6 @@ a:hover { color: var(--teal-mid); }
   display: flex;
   flex: 1;
   align-items: stretch;
-  justify-content: center;
 }
 
 /* HAMBURGER */
@@ -214,10 +213,8 @@ a:hover { color: var(--teal-mid); }
   flex: 1;
   padding: 2rem 2.5rem;
   overflow-y: auto;
-  background: #E8EDF4;
+  background: #D8E2EF;
   min-width: 0;
-  max-width: 960px;
-  margin: 0 auto;
   animation: fadeInUp 0.38s ease;
 }
 
@@ -280,9 +277,9 @@ a:hover { color: var(--teal-mid); }
 
 /* ── CARD ── */
 .card {
-  background: var(--white); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1.6rem 1.75rem;
-  margin-bottom: 1.4rem; box-shadow: var(--shadow-sm);
+  background: #F7F9FC; border: 1.5px solid #C8D5E8;
+  border-radius: var(--radius); padding: 1.4rem 1.6rem;
+  margin-bottom: 1.4rem; box-shadow: 0 2px 12px rgba(15,23,42,0.08);
   transition: var(--transition); animation: fadeInUp 0.42s ease;
 }
 .card:hover { box-shadow: var(--shadow); }
@@ -322,7 +319,7 @@ tbody td { padding: 0.85rem 0.95rem; color: var(--slate); vertical-align: middle
 .badge-gray  { background: #F1F5F9; color: var(--slate); border: 1px solid var(--border); }
 
 /* ── FORMS ── */
-.form-group { margin-bottom: 1.15rem; }
+.form-group { margin-bottom: 0.85rem; }
 .form-label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--slate); margin-bottom: 0.4rem; }
 .form-label span.required { color: var(--danger); margin-left: 2px; }
 .form-control {
