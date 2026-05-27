@@ -7,6 +7,41 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+
+<!-- Custom top nav (replaces sidebar on this page) -->
+<nav class="submit-topnav">
+  <div class="brand">Tek<span>Fix</span></div>
+  <div class="nav-links">
+    <a href="dashboard.html">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="submit.html" class="active">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <span>Submit Report</span>
+    </a>
+    <a href="history.html">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span>My Submissions</span>
+    </a>
+  </div>
+  <div class="nav-right">
+    <div class="avatar" id="nav-initials">SV</div>
+    <span id="nav-username"></span>
+    <button class="logout" id="logout-btn2">Logout</button>
+  </div>
+</nav>
+
+<!-- Dark gradient canvas -->
+<div class="submit-page-bg">
+  <div class="submit-hero">
+    <h1>Submit Shift Report</h1>
+    <p>Record outlet observations for admin review</p>
+  </div>
+  <div id="alert-box-top"></div>
+
+  <div class="submit-float-card">
+
 <div class="app-shell">
 
   <header class="topbar">
@@ -177,13 +212,160 @@
 
   </div><!-- /.body-row -->
 </div><!-- /.app-shell -->
+  </div><!-- /.submit-float-card -->
+</div><!-- /.submit-page-bg -->
 
 <style>
-  /* Times row also stacks on mobile */
-  @media (max-width: 768px) {
+  /* ── Override: hide sidebar, promote to top nav ── */
+  .sidebar {
+    display: none !important;
+  }
+  .body-row {
+    display: block !important;
+  }
+  .topbar {
+    display: none !important;
+  }
+
+  /* ── Custom top nav for submit page ── */
+  .submit-topnav {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #0F172A;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 54px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+  }
+  .submit-topnav .brand {
+    font-weight: 900;
+    font-size: 1.15rem;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+  .submit-topnav .brand span { color: #14B8A6; }
+  .submit-topnav .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .submit-topnav .nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    color: rgba(255,255,255,0.55);
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.18s ease;
+  }
+  .submit-topnav .nav-links a:hover { color: white; background: rgba(255,255,255,0.08); }
+  .submit-topnav .nav-links a.active { color: #14B8A6; background: rgba(20,184,166,0.15); }
+  .submit-topnav .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .submit-topnav .nav-right span { font-size: 0.82rem; color: rgba(255,255,255,0.55); }
+  .submit-topnav .nav-right .avatar {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #0F766E, #D97706);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800; color: white;
+  }
+  .submit-topnav .nav-right .logout {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.78rem;
+    background: none;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .submit-topnav .nav-right .logout:hover { border-color: #14B8A6; color: #14B8A6; }
+
+  /* ── Page canvas ── */
+  .submit-page-bg {
+    min-height: calc(100vh - 54px);
+    background: linear-gradient(160deg, #0F172A 0%, #1E3A5F 40%, #0F3D38 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1.5rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Decorative orbs */
+  .submit-page-bg::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(20,184,166,0.12) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    pointer-events: none;
+  }
+  .submit-page-bg::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,119,6,0.08) 0%, transparent 70%);
+    bottom: -80px; left: -80px;
+    pointer-events: none;
+  }
+
+  /* ── Page header above card ── */
+  .submit-hero {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative; z-index: 1;
+  }
+  .submit-hero h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.3rem;
+  }
+  .submit-hero p {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.875rem;
+  }
+
+  /* ── Floating form card ── */
+  .submit-float-card {
+    width: 100%;
+    max-width: 720px;
+    background: rgba(255,255,255,0.97);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.45), 0 4px 16px rgba(0,0,0,0.2);
+    padding: 2.25rem 2.5rem;
+    position: relative; z-index: 1;
+  }
+
+  /* Section dividers inside card */
+  .form-section {
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid #EEF2F7;
+  }
+  .form-section:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  /* Times row stacks on mobile */
+  @media (max-width: 640px) {
     .times-row { grid-template-columns: 1fr !important; }
-    /* Date+Outlet row */
-    .times-row ~ div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+    .submit-float-card { padding: 1.5rem 1.25rem; }
+    .submit-topnav { padding: 0 1rem; }
+    .submit-topnav .nav-links a span { display: none; }
   }
   @media (max-width: 520px) {
     div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
@@ -195,6 +377,7 @@
   import { supabase, getOutlets, getAgents, getShiftDefinitions, populateSelect, showToast, logAction } from '../js/supabase-client.js';
 
   document.getElementById('logout-btn').onclick = logout;
+  document.getElementById('logout-btn2').onclick = logout;
 
   document.getElementById('hamburger').onclick = () => {
     document.getElementById('sidebar').classList.toggle('open');
@@ -211,6 +394,9 @@
   (async () => {
     const profile = await requireAuth(['supervisor', 'admin']);
     if (!profile) return;
+
+    document.getElementById('nav-username').textContent = profile.full_name.split(' ')[0];
+    document.getElementById('nav-initials').textContent = profile.full_name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
 
     document.getElementById('reporting_date').value = new Date().toISOString().split('T')[0];
 
