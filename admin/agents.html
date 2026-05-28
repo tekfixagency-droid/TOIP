@@ -401,7 +401,7 @@
     try {
       const { data, error } = await supabase
         .from('shift_reports')
-        .select('*, agents(full_name), outlets(name), shift_definitions(name)')
+        .select('*, agents!shift_reports_agent_id_fkey(full_name), outlets!shift_reports_outlet_id_fkey(name), shift_definitions!shift_reports_shift_definition_id_fkey(name)')
         .eq('is_deleted', false)
         .order('reporting_date', { ascending: false });
 
