@@ -164,6 +164,14 @@
     return Math.round((r.csat_score * 0.4 + r.team_relationship_score * 0.3 + r.cleanliness_score * 0.3) * 20);
   };
 
+  // Normalize joined relation names after constraint-hint query
+  const normalize = (data) => data.map(r => ({
+    ...r,
+    agents:            r['agents!shift_reports_agent_id_fkey']            || r.agents            || null,
+    outlets:           r['outlets!shift_reports_outlet_id_fkey']           || r.outlets           || null,
+    shift_definitions: r['shift_definitions!shift_reports_shift_definition_id_fkey'] || r.shift_definitions || null,
+  }));
+
   function buildAgentStats(reports) {
     const map = {};
     reports.forEach(r => {
@@ -407,7 +415,7 @@
 
       if (error) throw error;
 
-      allReports = data;
+allReports = normalize(data);
       filtered   = [...allReports];
       const stats = buildAgentStats(filtered);
       renderLeaderboard(stats);
