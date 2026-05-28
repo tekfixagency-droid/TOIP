@@ -9,37 +9,35 @@
 </head>
 <body>
 <div class="app-shell">
-  <header class="topbar">
-    <div style="display:flex;align-items:center;gap:1rem">
-      <button class="hamburger" id="hamburger">☰</button>
-      <div class="topbar-brand">Tek<span>Fix</span> <span style="font-weight:400;color:#718096;font-size:0.85rem">Admin</span></div>
-    </div>
-    <div class="topbar-right">
+  <nav class="admin-topnav">
+  <div class="admin-topnav-upper">
+    <a href="dashboard.html" class="admin-topnav-brand">Tek<span>Fix</span> <span style="font-weight:400;color:rgba(255,255,255,0.4);font-size:0.85rem">Admin</span></a>
+    <div class="admin-topnav-right">
       <div class="avatar" id="user-initials">AD</div>
-      <span id="user-name" style="font-size:0.9rem"></span>
+      <span class="username" id="user-name"></span>
       <button class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
     </div>
-  </header>
-
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Analytics</div>
-      <a href="dashboard.html"  class="nav-item">📊 Dashboard</a>
-      <a href="analytics.html"  class="nav-item active">📈 Analytics</a>
-      <a href="agents.html"     class="nav-item">👤 Agent Reports</a>
-      <a href="outlets.html"    class="nav-item">🏪 Outlet Reports</a>
+  </div>
+  <div class="admin-topnav-lower">
+    <div class="admin-nav-group">
+      <span class="admin-nav-group-label">Analytics</span>
+      <a href="dashboard.html"  class="admin-nav-link">📊 Dashboard</a>
+      <a href="analytics.html"  class="admin-nav-link active">📈 Analytics</a>
+      <a href="agents.html"     class="admin-nav-link">👤 Agent Reports</a>
+      <a href="outlets.html"    class="admin-nav-link">🏪 Outlet Reports</a>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Configuration</div>
-      <a href="manage-outlets.html" class="nav-item">🏪 Manage Outlets</a>
-      <a href="manage-agents.html"  class="nav-item">👤 Manage Agents</a>
-      <a href="manage-shifts.html"  class="nav-item">🕐 Manage Shifts</a>
-      <a href="manage-kpis.html"    class="nav-item">📋 Manage KPIs</a>
-      <a href="users.html"          class="nav-item">👥 Manage Supervisors</a>
+    <div class="admin-nav-separator"></div>
+    <div class="admin-nav-group">
+      <span class="admin-nav-group-label">Configuration</span>
+      <a href="manage-outlets.html" class="admin-nav-link">🏪 Manage Outlets</a>
+      <a href="manage-agents.html"  class="admin-nav-link">👤 Manage Agents</a>
+      <a href="manage-shifts.html"  class="admin-nav-link">🕐 Manage Shifts</a>
+      <a href="manage-kpis.html"    class="admin-nav-link">📋 Manage KPIs</a>
+      <a href="users.html"          class="admin-nav-link">👥 Manage Supervisors</a>
     </div>
-  </nav>
-
-  <main class="main-content" id="main-content">
+  </div>
+</nav>
+<main class="admin-main" id="main-content">
     <div class="page-header">
       <h1>Analytics</h1>
       <p>Deep-dive into performance trends across all outlets, agents, and supervisors</p>
@@ -172,15 +170,12 @@
       </div>
     </div>
   </main>
-</div>
 
 <script type="module">
   import { requireAuth, logout } from '../js/auth.js';
   import { supabase, getOutlets } from '../js/supabase-client.js';
 
-  document.getElementById('logout-btn').onclick    = logout;
-  document.getElementById('hamburger').onclick     = () => document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('main-content').onclick  = () => document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('logout-btn').onclick = logout;
 
   Chart.defaults.color       = '#A0AEC0';
   Chart.defaults.borderColor = 'rgba(255,255,255,0.07)';
