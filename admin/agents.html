@@ -164,7 +164,10 @@
     return Math.round((r.csat_score * 0.4 + r.team_relationship_score * 0.3 + r.cleanliness_score * 0.3) * 20);
   };
 
-const normalize = (data) => data;
+const normalize = (data) => data.map(r => {
+    // Log first row to verify
+    return r;
+  });
 
 function buildAgentStats(reports) {
     const map = {};
