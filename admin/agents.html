@@ -209,7 +209,7 @@ const normalize = (data) => data;
             ${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}
           </span>
         </td>
-        <td><strong style="color:#fff">${a.name}</strong></td>
+        <td><strong style="color:#0F172A;font-weight:700">${a.name}</strong></td>
         <td>${a.outlet}</td>
         <td><span class="badge badge-blue">${a.count}</span></td>
         <td>${a.avgCsat  ?? '—'}</td>
@@ -309,7 +309,7 @@ const normalize = (data) => data;
       return `
         <tr>
           <td>${new Date(r.reporting_date).toLocaleDateString('en-KE')}</td>
-          <td><strong style="color:#fff">${r.agents?.full_name || r['agents!shift_reports_agent_id_fkey']?.full_name || '—'}</strong></td>
+<td><strong style="color:#0F172A;font-weight:700">${r.agents?.full_name || '—'}</strong></td>
           <td>${r.outlets?.name || '—'}</td>
           <td><span class="badge badge-blue">${r.shift_definitions?.name || '—'}</span></td>
           <td><span class="badge ${r.balance_status==='Balanced'?'badge-green':'badge-red'}">${r.balance_status}</span></td>
@@ -411,7 +411,7 @@ const { data, error } = await supabase
 
 allReports = normalize(data);
       filtered   = [...allReports];
-      console.log('CHECK:', allReports[0]?.agent_id, allReports[0]?.agents);
+
       const stats = buildAgentStats(filtered);
       renderLeaderboard(stats);
       buildCharts(stats);
