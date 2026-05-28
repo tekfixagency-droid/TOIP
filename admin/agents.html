@@ -164,15 +164,12 @@
     return Math.round((r.csat_score * 0.4 + r.team_relationship_score * 0.3 + r.cleanliness_score * 0.3) * 20);
   };
 
-const normalize = (data) => data.map(r => {
-    // Log first row to verify
-    return r;
-  });
+const normalize = (data) => data;
 
-function buildAgentStats(reports) {
+  function buildAgentStats(reports) {
     const map = {};
     reports.forEach(r => {
-      const id   = r.agent_id || r.agents?.full_name || 'unknown';
+      const id   = r.agent_id;
       const name = r.agents?.full_name || 'Unknown';
       const outlet = r.outlets?.name   || '—';
       if (!map[id]) map[id] = { id, name, outlet, reports: [], scores: [], incidents: 0, balanced: 0 };
@@ -414,6 +411,7 @@ const { data, error } = await supabase
 
 allReports = normalize(data);
       filtered   = [...allReports];
+      console.log('CHECK:', allReports[0]?.agent_id, allReports[0]?.agents);
       const stats = buildAgentStats(filtered);
       renderLeaderboard(stats);
       buildCharts(stats);
