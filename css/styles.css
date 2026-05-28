@@ -219,6 +219,74 @@ a:hover { color: var(--teal-mid); }
   .admin-nav-link { padding: 0 0.65rem; font-size: 0.78rem; }
 }
 /* ══════════════════════════════════════════ */
+/* ── Clickable Stat Cards ── */
+.stat-clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stat-clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+.stat-clickable.active-stat {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.stat-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  opacity: 0.8;
+}
+
+/* ── Drill-down Panel ── */
+.admin-drilldown {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.admin-drilldown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.admin-drilldown-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.admin-drilldown-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+.admin-drilldown-close {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 6px;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.admin-drilldown-close:hover {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+.admin-drilldown-footer {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 /* ── LOGIN PAGE ── */
 .login-page {
   min-height: 100vh;
