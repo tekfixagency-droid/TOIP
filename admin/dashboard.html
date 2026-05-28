@@ -8,8 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-<div class="app-shell">
-  <nav class="admin-topnav">
+<nav class="admin-topnav">
   <div class="admin-topnav-upper">
     <a href="dashboard.html" class="admin-topnav-brand">Tek<span>Fix</span> <span style="font-weight:400;color:rgba(255,255,255,0.4);font-size:0.85rem">Admin</span></a>
     <div class="admin-topnav-right">
@@ -85,10 +84,11 @@
         <div class="stat-label">Balance Rate</div>
         <div class="stat-hint">Click to view →</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card stat-clickable" id="card-supervisors">
         <div class="stat-icon">👥</div>
         <div class="stat-value" id="stat-supervisors">—</div>
         <div class="stat-label">Active Supervisors</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
     </div>
 
@@ -304,6 +304,21 @@ document.getElementById('stat-supervisors').textContent = supervisors?.length ??
         const bal = reports.filter(r => r.balance_status === 'Balanced');
         activateCard('card-balanced');
         showDrilldown('Balanced Reports', `${bal.length} of ${reports.length} reports are balanced`, bal);
+      };
+      document.getElementById('card-outlets').onclick = () => {
+        activateCard('card-outlets');
+        const rows = reports.filter((r,i,a) => a.findIndex(x=>x.outlets?.name===r.outlets?.name)===i);
+        showDrilldown('Active Outlets', `${outlets?.length ?? 0} active outlets`, rows);
+      };
+      document.getElementById('card-agents').onclick = () => {
+        activateCard('card-agents');
+        const rows = reports.filter((r,i,a) => a.findIndex(x=>x.agents?.full_name===r.agents?.full_name)===i);
+        showDrilldown('Active Agents', `${agents?.length ?? 0} active agents`, rows);
+      };
+      document.getElementById('card-supervisors').onclick = () => {
+        activateCard('card-supervisors');
+        const rows = reports.filter((r,i,a) => a.findIndex(x=>x.profiles?.full_name===r.profiles?.full_name)===i);
+        showDrilldown('Active Supervisors', `${supervisors?.length ?? 0} active supervisors`, rows);
       };
 
       // ── Chart 1: Reports over last 30 days ──
