@@ -164,13 +164,7 @@
     return Math.round((r.csat_score * 0.4 + r.team_relationship_score * 0.3 + r.cleanliness_score * 0.3) * 20);
   };
 
-  // Normalize joined relation names after constraint-hint query
-  const normalize = (data) => data.map(r => ({
-    ...r,
-    agents:            r['agents!shift_reports_agent_id_fkey']            || r.agents            || null,
-    outlets:           r['outlets!shift_reports_outlet_id_fkey']           || r.outlets           || null,
-    shift_definitions: r['shift_definitions!shift_reports_shift_definition_id_fkey'] || r.shift_definitions || null,
-  }));
+const normalize = (data) => data;
 
 function buildAgentStats(reports) {
     const map = {};
@@ -407,9 +401,9 @@ function buildAgentStats(reports) {
     } catch(_) {}
 
     try {
-      const { data, error } = await supabase
+const { data, error } = await supabase
         .from('shift_reports')
-        .select('*, agents!shift_reports_agent_id_fkey(full_name), outlets!shift_reports_outlet_id_fkey(name), shift_definitions!shift_reports_shift_definition_id_fkey(name)')
+        .select('*, agents(full_name), outlets(name), shift_definitions(name)')
         .eq('is_deleted', false)
         .order('reporting_date', { ascending: false });
 
