@@ -307,19 +307,38 @@ document.getElementById('stat-supervisors').textContent = supervisors?.length ??
         activateCard('card-balanced');
         showDrilldown('Balanced Reports', `${bal.length} of ${reports.length} reports are balanced`, bal);
       };
-      document.getElementById('card-outlets').onclick = () => {
+const elOutlets = document.getElementById('card-outlets');
+      const elAgents  = document.getElementById('card-agents');
+      const elSupervs = document.getElementById('card-supervisors');
+
+      if (elOutlets) elOutlets.onclick = () => {
         activateCard('card-outlets');
-        const rows = reports.filter((r,i,a) => a.findIndex(x=>x.outlets?.name===r.outlets?.name)===i);
+        const seen = new Set();
+        const rows = reports.filter(r => {
+          const n = r.outlets?.name;
+          if (!n || seen.has(n)) return false;
+          seen.add(n); return true;
+        });
         showDrilldown('Active Outlets', `${outlets?.length ?? 0} active outlets`, rows);
       };
-      document.getElementById('card-agents').onclick = () => {
+      if (elAgents) elAgents.onclick = () => {
         activateCard('card-agents');
-        const rows = reports.filter((r,i,a) => a.findIndex(x=>x.agents?.full_name===r.agents?.full_name)===i);
+        const seen = new Set();
+        const rows = reports.filter(r => {
+          const n = r.agents?.full_name;
+          if (!n || seen.has(n)) return false;
+          seen.add(n); return true;
+        });
         showDrilldown('Active Agents', `${agents?.length ?? 0} active agents`, rows);
       };
-      document.getElementById('card-supervisors').onclick = () => {
+      if (elSupervs) elSupervs.onclick = () => {
         activateCard('card-supervisors');
-        const rows = reports.filter((r,i,a) => a.findIndex(x=>x.profiles?.full_name===r.profiles?.full_name)===i);
+        const seen = new Set();
+        const rows = reports.filter(r => {
+          const n = r.profiles?.full_name;
+          if (!n || seen.has(n)) return false;
+          seen.add(n); return true;
+        });
         showDrilldown('Active Supervisors', `${supervisors?.length ?? 0} active supervisors`, rows);
       };
 
