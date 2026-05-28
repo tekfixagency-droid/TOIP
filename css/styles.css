@@ -75,9 +75,9 @@ a:hover { color: var(--teal-mid); }
   position: sticky;
   top: 0;
   z-index: 300;
-  background: linear-gradient(135deg, #0F4C75 0%, #1B262C 60%, #0F3460 100%);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  background: linear-gradient(135deg, #0F766E 0%, #0D9488 50%, #0891B2 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 4px 20px rgba(8,145,178,0.3);
   width: 100%;
 }
 .admin-topnav-upper {
@@ -175,10 +175,10 @@ a:hover { color: var(--teal-mid); }
   border-bottom-color: rgba(255,255,255,0.2);
 }
 .admin-nav-link.active {
-  color: #2DD4BF;
-  border-bottom-color: #14B8A6;
-  background: rgba(20,184,166,0.1);
-  font-weight: 600;
+  color: #ffffff;
+  border-bottom-color: #ffffff;
+  background: rgba(255,255,255,0.15);
+  font-weight: 700;
 }
 .admin-nav-link.active::after {
   content: '';
@@ -186,7 +186,7 @@ a:hover { color: var(--teal-mid); }
   bottom: -1px;
   left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, #14B8A6, #2DD4BF);
+  background: linear-gradient(90deg, #ffffff, rgba(255,255,255,0.6));
   border-radius: 2px 2px 0 0;
 }
 .admin-nav-separator {
