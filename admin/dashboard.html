@@ -43,27 +43,31 @@
       <p>Platform-wide overview of outlet performance and reporting activity</p>
     </div>
 
-    <!-- KPI Stats -->
+   <!-- KPI Stats -->
     <div class="stats-grid">
-      <div class="stat-card gold-accent">
+      <div class="stat-card gold-accent stat-clickable" id="card-total">
         <div class="stat-icon gold">📋</div>
         <div class="stat-value" id="stat-total">—</div>
         <div class="stat-label">Total Reports</div>
+        <div class="stat-hint">Click to view all →</div>
       </div>
-      <div class="stat-card green-accent">
+      <div class="stat-card green-accent stat-clickable" id="card-month">
         <div class="stat-icon green">📅</div>
         <div class="stat-value" id="stat-month">—</div>
         <div class="stat-label">Reports This Month</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card stat-clickable" id="card-score">
         <div class="stat-icon">⭐</div>
         <div class="stat-value" id="stat-score">—</div>
         <div class="stat-label">Avg Quality Score</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
-      <div class="stat-card red-accent">
+      <div class="stat-card red-accent stat-clickable" id="card-incidents">
         <div class="stat-icon red">⚠️</div>
         <div class="stat-value" id="stat-incidents">—</div>
         <div class="stat-label">Incidents This Month</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon gold">🏪</div>
@@ -75,15 +79,42 @@
         <div class="stat-value" id="stat-agents">—</div>
         <div class="stat-label">Active Agents</div>
       </div>
-      <div class="stat-card green-accent">
+      <div class="stat-card green-accent stat-clickable" id="card-balanced">
         <div class="stat-icon green">✅</div>
         <div class="stat-value" id="stat-balanced">—</div>
         <div class="stat-label">Balance Rate</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">👥</div>
         <div class="stat-value" id="stat-supervisors">—</div>
         <div class="stat-label">Active Supervisors</div>
+      </div>
+    </div>
+
+    <!-- Drill-down panel -->
+    <div id="admin-drilldown" class="admin-drilldown" style="display:none">
+      <div class="admin-drilldown-header">
+        <div>
+          <div class="admin-drilldown-title" id="dd-title">Reports</div>
+          <div class="admin-drilldown-sub" id="dd-sub"></div>
+        </div>
+        <button class="admin-drilldown-close" id="dd-close">✕</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Supervisor</th><th>Agent</th><th>Outlet</th>
+              <th>Balance</th><th>Quality %</th><th>Incident</th>
+            </tr>
+          </thead>
+          <tbody id="dd-body"></tbody>
+        </table>
+      </div>
+      <div class="admin-drilldown-footer">
+        <span id="dd-count" class="badge badge-blue"></span>
+        <a href="analytics.html" class="btn btn-outline btn-sm">Full Analytics →</a>
       </div>
     </div>
 
