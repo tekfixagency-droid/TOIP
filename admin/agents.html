@@ -403,7 +403,7 @@ function buildAgentStats(reports) {
     try {
 const { data, error } = await supabase
         .from('shift_reports')
-        .select('*, agents(full_name), outlets(name), shift_definitions(name)')
+        .select('id, agent_id, outlet_id, submitted_by, shift_definition_id, reporting_date, balance_status, csat_score, team_relationship_score, cleanliness_score, unprofessional_behavior, specific_challenges, areas_of_improvement, agents(full_name), outlets(name), shift_definitions(name)')
         .eq('is_deleted', false)
         .order('reporting_date', { ascending: false });
 
