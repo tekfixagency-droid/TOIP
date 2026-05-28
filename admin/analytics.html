@@ -64,40 +64,72 @@
 
     <!-- Summary Stats -->
     <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
-      <div class="stat-card gold-accent">
+      <div class="stat-card gold-accent stat-clickable" id="sc-total">
         <div class="stat-value" id="s-total">—</div>
         <div class="stat-label">Total Reports</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
-      <div class="stat-card green-accent">
+      <div class="stat-card green-accent stat-clickable" id="sc-score">
         <div class="stat-value" id="s-score">—</div>
         <div class="stat-label">Avg Quality Score</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card stat-clickable" id="sc-csat">
         <div class="stat-value" id="s-csat">—</div>
         <div class="stat-label">Avg CSAT</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card stat-clickable" id="sc-team">
         <div class="stat-value" id="s-team">—</div>
         <div class="stat-label">Avg Team Score</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card stat-clickable" id="sc-clean">
         <div class="stat-value" id="s-clean">—</div>
         <div class="stat-label">Avg Cleanliness</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
-      <div class="stat-card red-accent">
+      <div class="stat-card red-accent stat-clickable" id="sc-incidents">
         <div class="stat-value" id="s-incidents">—</div>
         <div class="stat-label">Incidents</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
-      <div class="stat-card green-accent">
+      <div class="stat-card green-accent stat-clickable" id="sc-balance">
         <div class="stat-value" id="s-balance">—</div>
         <div class="stat-label">Balance Rate</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card stat-clickable" id="sc-unbalanced">
         <div class="stat-value" id="s-unbalanced">—</div>
         <div class="stat-label">Unbalanced Reports</div>
+        <div class="stat-hint">Click to view →</div>
       </div>
     </div>
 
+    <!-- Analytics Drill-down panel -->
+    <div id="analytics-drilldown" class="admin-drilldown" style="display:none">
+      <div class="admin-drilldown-header">
+        <div>
+          <div class="admin-drilldown-title" id="ad-title">Reports</div>
+          <div class="admin-drilldown-sub" id="ad-sub"></div>
+        </div>
+        <button class="admin-drilldown-close" id="ad-close">✕</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Supervisor</th><th>Agent</th><th>Outlet</th>
+              <th>Balance</th><th>Quality %</th><th>Incident</th>
+            </tr>
+          </thead>
+          <tbody id="ad-body"></tbody>
+        </table>
+      </div>
+      <div class="admin-drilldown-footer">
+        <span id="ad-count" class="badge badge-blue"></span>
+      </div>
+    </div>
     <!-- Charts -->
     <div class="charts-grid">
       <div class="chart-card">
@@ -431,6 +463,81 @@
     a.download = `tekfix-reports-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  // ── Analytics drill-down ──
+  function adRowHtml(r) {
+    const score = calcScore(r);
+    return `<tr>
+      <td>${new Date(r.reporting_date).toLocaleDateString('en-KE')}</td>
+      <td>${r.profiles?.full_name||'—'}</td>
+      <td>${r.agents?.full_name||'—'}</td>
+      <td>${r.outlets?.name||'—'}</td>
+      <td><span class="badge ${r.balance_status==='Balanced'?'badge-green':'badge-red'}">${r.balance_status}</span></td>
+      <td>${score!==null?`<span style="font-weight:700;color:${score>=80?'#68D391':score>=60?'#C9A84C':'#FC8181'}">${score}%</span>`:'—'}</td>
+      <td>${r.unprofessional_behavior?`<span class="badge badge-red">${r.unprofessional_behavior}</span>`:`<span class="badge badge-green">None</span>`}</td>
+    </tr>`;
+  }
+  function showAD(title, sub, rows) {
+    const panel = document.getElementById('analytics-drilldown');
+    document.getElementById('ad-title').textContent = title;
+    document.getElementById('ad-sub').textContent   = sub;
+    document.getElementById('ad-count').textContent = `${rows.length} records`;
+    document.getElementById('ad-body').innerHTML    = rows.length
+      ? rows.map(adRowHtml).join('')
+      : `<tr><td colspan="7"><div class="empty-state"><p>No records found.</p></div></td></tr>`;
+    panel.style.display = 'block';
+    panel.style.animation = 'none'; panel.offsetHeight; panel.style.animation = '';
+    setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'start' }), 60);
+  }
+  function hideAD() {
+    document.getElementById('analytics-drilldown').style.display = 'none';
+    document.querySelectorAll('.stat-clickable').forEach(c => c.classList.remove('active-stat'));
+  }
+  function activateSC(id) {
+    document.querySelectorAll('.stat-clickable').forEach(c => c.classList.remove('active-stat'));
+    document.getElementById(id).classList.add('active-stat');
+  }
+  document.getElementById('ad-close').onclick = hideAD;
+
+  document.getElementById('sc-total').onclick = () => {
+    activateSC('sc-total');
+    showAD('All Reports', `${filtered.length} reports`, filtered);
+  };
+  document.getElementById('sc-score').onclick = () => {
+    const rows = [...filtered].filter(r => calcScore(r) !== null).sort((a,b) => calcScore(b)-calcScore(a));
+    activateSC('sc-score');
+    showAD('Reports by Quality Score', 'Sorted highest first', rows);
+  };
+  document.getElementById('sc-csat').onclick = () => {
+    const rows = [...filtered].filter(r => r.csat_score).sort((a,b) => b.csat_score-a.csat_score);
+    activateSC('sc-csat');
+    showAD('Reports by CSAT Score', 'Sorted highest first', rows);
+  };
+  document.getElementById('sc-team').onclick = () => {
+    const rows = [...filtered].filter(r => r.team_relationship_score).sort((a,b) => b.team_relationship_score-a.team_relationship_score);
+    activateSC('sc-team');
+    showAD('Reports by Team Score', 'Sorted highest first', rows);
+  };
+  document.getElementById('sc-clean').onclick = () => {
+    const rows = [...filtered].filter(r => r.cleanliness_score).sort((a,b) => b.cleanliness_score-a.cleanliness_score);
+    activateSC('sc-clean');
+    showAD('Reports by Cleanliness Score', 'Sorted highest first', rows);
+  };
+  document.getElementById('sc-incidents').onclick = () => {
+    const rows = filtered.filter(r => r.unprofessional_behavior);
+    activateSC('sc-incidents');
+    showAD('Incident Reports', `${rows.length} incidents`, rows);
+  };
+  document.getElementById('sc-balance').onclick = () => {
+    const rows = filtered.filter(r => r.balance_status === 'Balanced');
+    activateSC('sc-balance');
+    showAD('Balanced Reports', `${rows.length} balanced reports`, rows);
+  };
+  document.getElementById('sc-unbalanced').onclick = () => {
+    const rows = filtered.filter(r => r.balance_status !== 'Balanced');
+    activateSC('sc-unbalanced');
+    showAD('Unbalanced Reports', `${rows.length} unbalanced reports`, rows);
   };
 
   document.getElementById('apply-filter').onclick = applyFilters;
