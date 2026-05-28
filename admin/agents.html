@@ -415,7 +415,8 @@
 
       if (error) throw error;
 
-allReports = normalize(data);
+console.log('FIRST ROW:', JSON.stringify(data[0], null, 2));
+      allReports = normalize(data);
       filtered   = [...allReports];
       const stats = buildAgentStats(filtered);
       renderLeaderboard(stats);
