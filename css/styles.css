@@ -453,9 +453,11 @@ thead th {
 }
 tbody tr { border-bottom: 1px solid var(--border); transition: var(--transition); }
 tbody tr:hover { background: #F0FDFA; }
+tbody tr:hover td { color: var(--navy); }
+tbody tr:hover td strong { color: var(--navy) !important; }
 tbody tr:last-child { border-bottom: none; }
 tbody td { padding: 0.85rem 0.95rem; color: var(--slate); vertical-align: middle; }
-
+tbody td strong { color: var(--navy) !important; }
 /* ── BADGES ── */
 .badge {
   display: inline-flex; align-items: center;
