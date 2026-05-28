@@ -172,10 +172,10 @@
     shift_definitions: r['shift_definitions!shift_reports_shift_definition_id_fkey'] || r.shift_definitions || null,
   }));
 
-  function buildAgentStats(reports) {
+function buildAgentStats(reports) {
     const map = {};
     reports.forEach(r => {
-      const id   = r.agent_id;
+      const id   = r.agent_id || r.agents?.full_name || 'unknown';
       const name = r.agents?.full_name || 'Unknown';
       const outlet = r.outlets?.name   || '—';
       if (!map[id]) map[id] = { id, name, outlet, reports: [], scores: [], incidents: 0, balanced: 0 };
@@ -315,7 +315,7 @@
       return `
         <tr>
           <td>${new Date(r.reporting_date).toLocaleDateString('en-KE')}</td>
-          <td><strong style="color:#fff">${r.agents?.full_name || '—'}</strong></td>
+          <td><strong style="color:#fff">${r.agents?.full_name || r['agents!shift_reports_agent_id_fkey']?.full_name || '—'}</strong></td>
           <td>${r.outlets?.name || '—'}</td>
           <td><span class="badge badge-blue">${r.shift_definitions?.name || '—'}</span></td>
           <td><span class="badge ${r.balance_status==='Balanced'?'badge-green':'badge-red'}">${r.balance_status}</span></td>
@@ -415,8 +415,7 @@
 
       if (error) throw error;
 
-console.log('FIRST ROW:', JSON.stringify(data[0], null, 2));
-      allReports = normalize(data);
+allReports = normalize(data);
       filtered   = [...allReports];
       const stats = buildAgentStats(filtered);
       renderLeaderboard(stats);
